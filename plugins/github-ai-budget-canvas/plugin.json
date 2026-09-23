@@ -1,0 +1,25 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "github-ai-budget-canvas",
+  "version": "1.0.0-experimental.1",
+  "description": "Review GitHub Copilot budget configuration and estimate spending in a canvas.",
+  "author": {
+    "name": "anarchitect",
+    "url": "https://github.com/anarchitect"
+  },
+  "homepage": "https://github.com/anarchitect/copilot-finops-canvas#readme",
+  "repository": "https://github.com/anarchitect/copilot-finops-canvas",
+  "license": "MIT",
+  "keywords": [
+    "github",
+    "copilot",
+    "budgets",
+    "billing",
+    "canvas"
+  ],
+  "extensions": {
+    "com.github.copilot": {
+      "logo": "com.github.copilot/extensions/github-ai-budget-canvas/assets/preview.png"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+Copilot FinOps canvas
+
+This notice also covers the generated standalone data and local extension
+copies. File paths below are relative to the packaged extension.
+
+Original canvas code
+
+Copyright (c) 2026 anarchitect.
+The original canvas code is licensed under the MIT License in LICENSE.
+Public author profile: https://github.com/anarchitect
+
+GitHub Docs content
+
+The following retained article bodies are from GitHub Docs, by GitHub and
+its contributors. They are licensed separately under Creative Commons
+Attribution 4.0 International (CC BY 4.0), not under the MIT License.
+
+renderer/data/budgets.md
+Title: Budgets for usage-based billing
+Original page:
+https://docs.github.com/en/enterprise-cloud@latest/copilot/concepts/billing-and-usage/organizations-and-enterprises/budgets
+Original Markdown retrieval:
+https://docs.github.com/api/article/body?pathname=/en/enterprise-cloud@latest/copilot/concepts/billing-and-usage/organizations-and-enterprises/budgets
+
+renderer/data/optimizing.md
+Title: Optimizing your budget configuration
+Original page:
+https://docs.github.com/en/copilot/tutorials/budgets/optimizing-your-budget-configuration
+Original Markdown retrieval:
+https://docs.github.com/api/article/body?pathname=/en/copilot/tutorials/budgets/optimizing-your-budget-configuration
+
+These locally retained Markdown bodies are redistributed unchanged by this
+packaging change. Attribution is provided here without altering the bodies.
+The original pages may have changed since the copies were retrieved.
+
+License: https://creativecommons.org/licenses/by/4.0/
+Full license text: licenses/CC-BY-4.0.txt
+GitHub Docs license source:
+https://github.com/github/docs/blob/6da14f22d56c5b9da658952c43b5d4253f16e6cf/LICENSE
+
+The CC BY 4.0 disclaimer of warranties and limitation of liability apply to
+these articles. See Section 5 of the included license. Attribution does not
+imply endorsement by GitHub or Creative Commons.

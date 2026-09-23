@@ -1,0 +1,3127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Copilot FinOps canvas</title>
+  <link rel="icon" href="data:,">
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: var(--background-color-default, #f6f8fa);
+      --cp-bg-elevated: var(--background-color-default, #ffffff);
+      --cp-surface: var(--background-color-default, #ffffff);
+      --cp-surface-soft: #f6f8fa;
+      --cp-border: var(--border-color-default, #d0d7de);
+      --cp-border-strong: #8c959f;
+      --cp-text: var(--text-color-default, #1f2328);
+      --cp-text-muted: var(--text-color-muted, #59636e);
+      --cp-text-soft: #6e7781;
+      --cp-accent: #0969da;
+      --cp-accent-hover: #0757b8;
+      --cp-accent-soft: #ddf4ff;
+      --cp-accent-fg: #ffffff;
+      --cp-success: #1a7f37;
+      --cp-danger: #cf222e;
+      --cp-warning: #9a6700;
+      --cp-link: #0969da;
+      --cp-highlight: rgba(9, 105, 218, 0.2);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: var(--background-color-default, #0d1117);
+      --cp-bg-elevated: #0d1117;
+      --cp-surface: #161b22;
+      --cp-surface-soft: #21262d;
+      --cp-border: var(--border-color-default, #30363d);
+      --cp-border-strong: #6e7681;
+      --cp-text: var(--text-color-default, #f0f6fc);
+      --cp-text-muted: var(--text-color-muted, #8b949e);
+      --cp-text-soft: #b1bac4;
+      --cp-accent: #2f81f7;
+      --cp-accent-hover: #1f6feb;
+      --cp-accent-soft: rgba(56, 139, 253, 0.15);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #3fb950;
+      --cp-danger: #f85149;
+      --cp-warning: #d29922;
+      --cp-link: #58a6ff;
+      --cp-highlight: rgba(56, 139, 253, 0.35);
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 20px 0 40px;
+    }
+    .hero {
+      margin-bottom: 16px;
+    }
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+    h1 {
+      margin-bottom: 4px;
+      font-size: 24px;
+      line-height: 1.25;
+      letter-spacing: -0.015em;
+    }
+    h2 {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+    h3 {
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+    .lede,
+    .muted,
+    .help {
+      color: var(--cp-text-muted);
+    }
+    .lede {
+      max-width: 760px;
+      line-height: 1.45;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+      gap: 12px;
+      align-items: start;
+    }
+    .card {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 6px;
+      padding: 16px;
+    }
+    .field {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    label {
+      font-weight: 600;
+    }
+    input,
+    select {
+      width: 100%;
+      min-height: 36px;
+      border: 1px solid var(--cp-border-strong);
+      border-radius: 6px;
+      background: var(--cp-bg-elevated);
+      color: var(--cp-text);
+      padding: 7px 10px;
+    }
+    input:focus,
+    select:focus,
+    button:focus-visible,
+    summary:focus-visible,
+    a:focus-visible,
+    [tabindex]:focus-visible {
+      outline: 3px solid var(--cp-highlight);
+      outline-offset: 2px;
+      border-color: var(--cp-accent);
+    }
+    button {
+      border: 1px solid var(--cp-accent);
+      border-radius: 6px;
+      min-height: 36px;
+      padding: 7px 12px;
+      cursor: pointer;
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      font-weight: 600;
+    }
+    button:hover {
+      background: var(--cp-accent-hover);
+    }
+    button:disabled {
+      cursor: wait;
+      opacity: 0.75;
+    }
+    button.loading::before {
+      content: "";
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      margin-right: 8px;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      vertical-align: -2px;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    button.secondary {
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      border-color: var(--cp-border-strong);
+    }
+    .button-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      padding: 7px 12px;
+      border: 1px solid var(--cp-border-strong);
+      border-radius: 6px;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    button.secondary:hover {
+      background: var(--cp-surface-soft);
+    }
+    .button-link:hover {
+      background: var(--cp-surface-soft);
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .result {
+      min-height: 220px;
+    }
+    .empty {
+      color: var(--cp-text-muted);
+      padding: 28px 4px;
+    }
+    .metric {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--cp-border);
+    }
+    .metric:last-child {
+      border-bottom: 0;
+    }
+    .metric strong {
+      text-align: right;
+    }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+      color: var(--cp-text-muted);
+      font-weight: 600;
+      font-size: 12px;
+    }
+    .status::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--cp-success);
+    }
+    .warning {
+      border-left: 4px solid var(--cp-warning);
+      background: var(--cp-surface-soft);
+      padding: 11px 12px;
+      border-radius: 4px;
+      margin: 12px 0;
+    }
+    .danger {
+      border-left-color: var(--cp-danger);
+    }
+    .success {
+      border-left-color: var(--cp-success);
+    }
+    details {
+      margin-top: 16px;
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 6px;
+      padding: 0 14px;
+    }
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+      padding: 12px 0;
+    }
+    .settings {
+      padding: 4px 0 20px;
+    }
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .section {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--cp-border);
+    }
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--cp-border);
+      border-radius: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+    th,
+    td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid var(--cp-border);
+      vertical-align: middle;
+    }
+    th {
+      color: var(--cp-text-muted);
+      background: var(--cp-surface-soft);
+      font-size: 0.86rem;
+    }
+    td input,
+    td select {
+      min-height: 36px;
+      padding: 6px 8px;
+    }
+    code {
+      font-family: Consolas, "Courier New", Courier, monospace;
+      color: var(--cp-text);
+      background: var(--cp-surface-soft);
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+    .trace {
+      margin: 12px 0 0;
+      padding-left: 22px;
+      line-height: 1.55;
+    }
+    .footer-note {
+      margin-top: 18px;
+      font-size: 0.9rem;
+      color: var(--cp-text-muted);
+    }
+    #ai-assessment-text {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      background: var(--cp-surface-soft);
+      border: 1px solid var(--cp-border);
+      border-radius: 6px;
+      padding: 16px;
+      line-height: 1.55;
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .action-stack {
+      display: grid;
+      gap: 8px;
+      min-width: 210px;
+    }
+    .ai-assessment {
+      margin-top: 18px;
+    }
+    .completed-section {
+      margin-top: 16px;
+    }
+    .prerequisite-panel {
+      margin-bottom: 12px;
+    }
+    .prerequisite-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .fallback-order {
+      margin: 10px 0 14px;
+      padding-left: 22px;
+      color: var(--cp-text-muted);
+    }
+    .verification-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .freshness-status::before,
+    .verification-status::before {
+      font-size: 11px;
+      line-height: 1;
+    }
+    .freshness-status.fresh::before,
+    .verification-status.fresh::before {
+      content: "●";
+    }
+    .freshness-status.expiring::before,
+    .verification-status.expiring::before {
+      content: "▲";
+    }
+    .freshness-status.stale::before,
+    .verification-status.stale::before {
+      content: "■";
+    }
+    .freshness-status.fresh,
+    .verification-status.fresh {
+      color: var(--cp-success);
+    }
+    .freshness-status.expiring,
+    .verification-status.expiring {
+      color: var(--cp-warning);
+    }
+    .freshness-status.stale,
+    .verification-status.stale {
+      color: var(--cp-danger);
+    }
+    .verification-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .check-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      border: 1px solid var(--cp-border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .check-item {
+      padding: 10px 12px;
+      border-right: 1px solid var(--cp-border);
+      border-bottom: 1px solid var(--cp-border);
+    }
+    .check-item strong {
+      display: block;
+      margin-bottom: 2px;
+    }
+    .check-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+    .check-status-marker {
+      display: inline-grid;
+      width: 14px;
+      height: 14px;
+      place-items: center;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .check-status-marker::before {
+      content: "\00d7";
+    }
+    .check-status.ready .check-status-marker::before {
+      content: "\2713";
+    }
+    .check-status.ready {
+      color: var(--cp-success);
+    }
+    .check-status.blocked,
+    .check-status.warning,
+    .check-status.optional,
+    .check-status.not_applicable {
+      color: var(--cp-danger);
+    }
+    .completed-list {
+      display: grid;
+      gap: 8px;
+    }
+    .completed-record {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--cp-border);
+    }
+    .completed-record:last-child {
+      border-bottom: 0;
+    }
+    .completed-record p {
+      margin-bottom: 4px;
+    }
+    .audit-summary {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--cp-muted);
+    }
+    .audit-status {
+      font-weight: 700;
+      color: var(--cp-success);
+    }
+    .audit-status.incomplete {
+      color: var(--cp-danger);
+    }
+    .audit-details {
+      margin-top: 8px;
+      grid-column: 1 / -1;
+    }
+    .audit-details summary {
+      color: var(--cp-link);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .audit-grid {
+      display: grid;
+      grid-template-columns: minmax(140px, 0.35fr) minmax(0, 1fr);
+      gap: 6px 12px;
+      margin: 10px 0 0;
+      padding: 10px;
+      border: 1px solid var(--cp-border);
+      border-radius: 6px;
+      background: var(--cp-subtle);
+      font-size: 12px;
+    }
+    .audit-grid dt {
+      font-weight: 700;
+    }
+    .audit-grid dd {
+      margin: 0;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+    .result-link {
+      align-self: center;
+      color: var(--cp-link);
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .result-link:hover {
+      text-decoration: underline;
+    }
+    .knowledge {
+      margin-top: 24px;
+    }
+    .knowledge-grid {
+      display: block;
+    }
+    .knowledge .card {
+      line-height: 1.55;
+    }
+    .knowledge li {
+      margin-bottom: 6px;
+    }
+    .knowledge a {
+      color: var(--cp-link);
+    }
+    .knowledge .wide {
+      grid-column: auto;
+    }
+    .knowledge .card {
+      border-width: 0 0 1px;
+      border-radius: 0;
+      padding: 18px 0;
+    }
+    .knowledge .card:last-child {
+      border-bottom: 0;
+    }
+    .tabs {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--cp-border);
+    }
+    button.tab {
+      min-height: 40px;
+      border: 0;
+      border-bottom: 3px solid transparent;
+      border-radius: 0;
+      background: transparent;
+      color: var(--cp-text-muted);
+      padding: 8px 2px;
+    }
+    button.tab:hover {
+      background: transparent;
+      color: var(--cp-text);
+    }
+    button.tab.active {
+      border-bottom-color: var(--cp-accent);
+      color: var(--cp-text);
+      background: transparent;
+    }
+    .tabpanel[hidden] {
+      display: none;
+    }
+    .assessment-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .assessment-header .actions {
+      flex-shrink: 0;
+    }
+    .moscow-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .moscow {
+      border-top: 0;
+    }
+    .moscow.must {
+      border-left: 3px solid var(--cp-danger);
+    }
+    .moscow.should {
+      border-left: 3px solid var(--cp-warning);
+    }
+    .moscow.could {
+      border-left: 3px solid var(--cp-success);
+    }
+    .moscow.notNow {
+      border-left: 3px solid var(--cp-text-muted);
+    }
+    .action-list {
+      display: grid;
+      gap: 0;
+      padding-left: 0;
+      list-style: none;
+    }
+    .action-item {
+      display: grid;
+      grid-template-columns: 24px auto minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+      padding: 12px 0;
+      border: 0;
+      border-bottom: 1px solid var(--cp-border);
+      border-radius: 0;
+      background: transparent;
+    }
+    .action-item input {
+      width: 18px;
+      min-height: 18px;
+      margin-top: 3px;
+    }
+    .action-rank {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border: 1px solid var(--cp-border);
+      border-radius: 50%;
+      color: var(--cp-text-muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .action-item.completed {
+      border-color: var(--cp-success);
+    }
+    .action-item.blocked {
+      border-color: var(--cp-danger);
+    }
+    .action-item.waived {
+      border-color: var(--cp-warning);
+    }
+    .action-item.refresh-required {
+      border-color: var(--cp-warning);
+    }
+    .action-item.completed .action-text {
+      text-decoration: line-through;
+      color: var(--cp-text-muted);
+    }
+    .action-copy {
+      display: grid;
+      gap: 6px;
+    }
+    .action-field {
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr);
+      gap: 8px;
+    }
+    .rollback-guidance > .muted { grid-column: 2; }
+    .action-label {
+      color: var(--cp-text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .validation-note {
+      color: var(--cp-text-muted);
+      font-size: 12px;
+    }
+    .dependency-reason {
+      display: block;
+      color: var(--cp-danger);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .dependency-reason:empty {
+      display: none;
+    }
+    .proceed-button {
+      min-height: 34px;
+      padding: 6px 11px;
+      white-space: nowrap;
+    }
+    .action-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .explain-button {
+      min-height: 34px;
+      padding: 6px 10px;
+      white-space: nowrap;
+    }
+    .action-help {
+      grid-column: 3 / -1;
+      padding: 10px 12px;
+      border-left: 2px solid var(--cp-accent);
+      background: var(--cp-surface-soft);
+      color: var(--cp-text-muted);
+      font-size: 13px;
+    }
+    .action-help[hidden] {
+      display: none;
+    }
+    .action-help a {
+      color: var(--cp-link);
+      font-weight: 600;
+    }
+    .action-result {
+      grid-column: 3 / -1;
+      color: var(--cp-text-muted);
+      font-size: 0.86rem;
+    }
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0;
+      margin-top: 14px;
+      border: 1px solid var(--cp-border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .evidence {
+      background: transparent;
+      border: 0;
+      border-right: 1px solid var(--cp-border);
+      border-bottom: 1px solid var(--cp-border);
+      padding: 12px;
+    }
+    .evidence span {
+      display: block;
+      color: var(--cp-text-muted);
+      font-size: 0.84rem;
+      margin-bottom: 5px;
+    }
+    .evidence strong {
+      font-size: 15px;
+    }
+    .card, .action-copy, .completed-record > div {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+    .operation-preview {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .operation-record {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--cp-border);
+    }
+    .action-item.unverified {
+      border-color: var(--cp-warning);
+    }
+    @media (max-width: 800px) {
+      .grid,
+      .settings-grid,
+      .knowledge-grid,
+      .moscow-grid,
+      .evidence-grid {
+        grid-template-columns: 1fr;
+      }
+      .knowledge .wide {
+        grid-column: auto;
+      }
+      .assessment-header {
+        display: block;
+      }
+      .assessment-header .actions {
+        margin-top: 12px;
+      }
+      .action-item {
+        grid-template-columns: 24px auto minmax(0, 1fr);
+      }
+      .proceed-button {
+        grid-column: 3;
+        justify-self: start;
+      }
+      .action-controls {
+        grid-column: 3;
+        justify-self: start;
+      }
+      .action-result {
+        grid-column: 3;
+      }
+      .action-help {
+        grid-column: 3;
+      }
+      .check-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 400px) {
+      .shell { width: calc(100% - 24px); }
+      .card { padding: 12px; }
+      .tabs { flex-wrap: wrap; }
+      .tab { flex: 1 1 40%; white-space: normal; }
+      .action-controls, .action-result, .action-help { grid-column: 1 / -1; }
+      .action-field { grid-template-columns: 1fr; gap: 4px; }
+      .rollback-guidance > .muted { grid-column: 1; }
+      .action-controls button { white-space: normal; }
+      .completed-record { grid-template-columns: minmax(0, 1fr); }
+      .audit-grid { grid-template-columns: minmax(0, 1fr); }
+      .action-stack { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <span class="status freshness-status stale" id="data-source-status" role="status" aria-live="polite">Stale, inventory required</span>
+      <h1>Copilot FinOps</h1>
+      <p class="lede">Review budget precedence, user headroom, and the controls most likely to block usage or allow unplanned spend.</p>
+    </section>
+
+    <nav class="tabs" role="tablist" aria-label="Budget tools">
+      <button class="tab active" id="tab-readiness" type="button" role="tab" tabindex="0" aria-selected="true" aria-controls="readiness-panel" data-tab="readiness">Readiness</button>
+      <button class="tab" id="tab-assessment" type="button" role="tab" tabindex="-1" aria-selected="false" aria-controls="assessment-panel" data-tab="assessment">Assessment</button>
+      <button class="tab" id="tab-advisor" type="button" role="tab" tabindex="-1" aria-selected="false" aria-controls="advisor-panel" data-tab="advisor">User budget advisor</button>
+      <button class="tab" id="tab-guidance" type="button" role="tab" tabindex="-1" aria-selected="false" aria-controls="guidance-panel" data-tab="guidance">Guidance</button>
+    </nav>
+
+    <article class="card" aria-labelledby="state-heading">
+      <h2 id="state-heading">Saved action state</h2>
+      <p id="action-state-status" role="status" aria-live="polite">Loading saved state.</p>
+      <p class="muted">Extension actions are saved in the host session workspace for this enterprise. Review saved outcomes and recovery evidence in the Assessment tab.</p>
+      <button id="reload-action-state" class="secondary" type="button">Refresh saved state</button>
+    </article>
+    <section id="readiness-panel" class="tabpanel" role="tabpanel" aria-labelledby="tab-readiness">
+      <div class="assessment-header">
+        <div>
+          <span class="status">Environment and access</span>
+          <h2>Execution readiness</h2>
+          <p class="lede">Check the selected execution path. The default API check verifies GitHub CLI, the current actor and access to the visible budget collection. It does not verify complete billing coverage, documentation availability or a browser session.</p>
+        </div>
+        <div class="action-stack">
+          <button id="check-prerequisites" type="button">Check prerequisites</button>
+          <button id="inventory" class="secondary" type="button">Refresh inventory</button>
+        </div>
+      </div>
+      <article class="card prerequisite-panel">
+        <div class="prerequisite-header">
+          <div>
+            <h3>Fallback order</h3>
+            <p class="muted">Only the selected path is checked. Each other path needs its own authentication and target permission check.</p>
+          </div>
+          <span class="muted" id="prerequisite-time">Not checked</span>
+        </div>
+        <ol class="fallback-order" id="fallback-order">
+          <li>GitHub REST API through <code>gh api</code></li>
+          <li>Authenticated GitHub UI automation</li>
+          <li>Guided manual GitHub UI</li>
+        </ol>
+        <div class="check-grid" id="prerequisite-results">
+          <div class="check-item"><strong>Run the check before execution</strong><span class="muted">Checks the selected path's tool, actor and visible target access.</span></div>
+        </div>
+        <p id="readiness-context" class="muted">Actor and credential source have not been verified.</p>
+      </article>
+      <article class="card">
+        <div class="prerequisite-header">
+          <div>
+            <h3>API snapshot freshness</h3>
+            <p class="muted" id="inventory-freshness-detail">No usable API snapshot is available.</p>
+          </div>
+          <span class="verification-status stale" id="inventory-freshness-status">Stale</span>
+        </div>
+        <p class="muted" id="inventory-freshness-thresholds">Freshness thresholds are loading.</p>
+        <p class="muted" id="inventory-next-refresh">Next required refresh is unknown.</p>
+        <div class="verification-legend" aria-label="API snapshot freshness states">
+          <span class="verification-status fresh">Fresh</span>
+          <span class="verification-status expiring">Expiring</span>
+          <span class="verification-status stale">Stale</span>
+        </div>
+      </article>
+      <article class="card">
+        <div class="prerequisite-header">
+          <div>
+            <h3>UI verification freshness</h3>
+            <p class="muted" id="ui-verification-detail">UI only facts have not been evaluated.</p>
+          </div>
+          <span class="verification-status stale" id="ui-verification-status">Stale</span>
+        </div>
+        <p class="muted">UI only facts are valid for 30 days. They become Expiring during the final 7 days. Stale, missing, or enterprise mismatched facts are treated as unknown and must be revalidated before execution. API derived facts keep their own inventory status.</p>
+        <div class="verification-legend" aria-label="UI verification freshness states">
+          <span class="verification-status fresh">Fresh</span>
+          <span class="verification-status expiring">Expiring</span>
+          <span class="verification-status stale">Stale</span>
+        </div>
+      </article>
+      <p class="footer-note" id="readiness-status" role="status" aria-live="polite">Readiness has not been checked.</p>
+    </section>
+
+    <section id="advisor-panel" class="tabpanel" role="tabpanel" aria-labelledby="tab-advisor" hidden>
+    <details>
+      <summary>Live inventory through the chat agent</summary>
+      <div class="settings">
+        <p>Select <strong>Refresh inventory</strong> in the Readiness tab. The canvas extension sends a message into the active chat, where the agent runs read only <code>gh api</code> calls and downloads the current GitHub Markdown guidance.</p>
+        <p class="muted">No separately started companion service is required. Access depends on the credential type, enterprise role and endpoint permissions. The supported actor lookup does not establish an identity for GitHub App installation tokens. A read check does not grant write permission.</p>
+      </div>
+    </details>
+    <section class="grid">
+      <article class="card">
+        <h2>Calculate a user's effective budget</h2>
+        <div class="field">
+          <label for="username">GitHub username</label>
+          <input id="username" list="known-users" autocomplete="off" placeholder="Run Inventory to load users">
+          <datalist id="known-users"></datalist>
+          <div class="help">Only the searched user is shown. Returned mappings and budget values are observations; incomplete coverage can leave the effective allowance unknown.</div>
+        </div>
+        <div class="actions">
+          <button id="calculate" type="button">Calculate budget</button>
+        </div>
+        <div class="footer-note">The calculator uses $0.01 per AI credit. A standalone scenario is an assumption-based estimate, never a guarantee of GitHub's actual billing or blocking decision.</div>
+      </article>
+
+      <aside class="card result" id="result" aria-live="polite">
+        <div class="empty">Enter a username, then select <strong>Calculate budget</strong>.</div>
+      </aside>
+    </section>
+
+    <details>
+      <summary>Scenario settings and user profiles</summary>
+      <div class="settings">
+        <p class="muted">Paid usage, budget objective and selected cost center are operator scenario assumptions, not observed policies. Other edited values are used only for standalone estimates. Live recommendations use the shared inventory policy and the explicit scenario selection.</p>
+
+        <div class="settings-grid">
+          <div class="field">
+            <label for="universal-budget">Universal user budget, USD</label>
+            <input id="universal-budget" type="number" min="0" step="1">
+          </div>
+          <div class="field">
+            <label for="pool-remaining">Shared pool remaining, credits</label>
+            <input id="pool-remaining" type="number" min="0" step="1" placeholder="Not inventoried">
+          </div>
+          <div class="field">
+            <label for="paid-usage">AI credit paid usage</label>
+            <select id="paid-usage">
+              <option value="unknown" selected>Unknown</option>
+              <option value="on">Enabled</option>
+              <option value="off">Disabled</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="budget-objective">Scenario budget objective</label>
+            <select id="budget-objective">
+              <option value="unknown" selected>Unknown, owner decision needed</option>
+              <option value="monitor">Monitor spending without blocking</option>
+              <option value="hard_cap">Hard cap with blocking</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="enterprise-budget">Enterprise Copilot budget, USD</label>
+            <input id="enterprise-budget" type="number" min="0" step="1">
+          </div>
+          <div class="field">
+            <label for="enterprise-consumed">Enterprise metered spend, USD</label>
+            <input id="enterprise-consumed" type="number" min="0" step="0.01" placeholder="Unknown">
+          </div>
+          <div class="field">
+            <label for="enterprise-stop">Enterprise hard stop</label>
+            <select id="enterprise-stop">
+              <option value="on">On</option>
+              <option value="off" selected>Off</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="exclude-cost-centers">Selected cost center exclusion, standalone assumption</label>
+            <select id="exclude-cost-centers">
+              <option value="unknown" selected>Unknown</option>
+              <option value="off">Off</option>
+              <option value="on">On</option>
+            </select>
+            <div class="help">This does not prove a global exclusion policy. Live scope and coverage remain unverified.</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Cost center configuration</h3>
+          <div class="settings-grid">
+            <div class="field">
+              <label for="cc-name">Cost center name</label>
+              <input id="cc-name" placeholder="Loaded by Inventory">
+            </div>
+            <div class="field">
+              <label for="cc-user-budget">Cost center user budget, USD per user</label>
+              <input id="cc-user-budget" type="number" min="0" step="1">
+            </div>
+            <div class="field">
+              <label for="cc-spending-budget">Cost center Copilot spending budget, USD</label>
+              <input id="cc-spending-budget" type="number" min="0" step="1" placeholder="Not currently set">
+            </div>
+            <div class="field">
+              <label for="cc-spending-consumed">Cost center metered spend, USD</label>
+              <input id="cc-spending-consumed" type="number" min="0" step="0.01" placeholder="Unknown">
+            </div>
+            <div class="field">
+              <label for="cc-stop">Cost center hard stop</label>
+              <select id="cc-stop">
+                <option value="on">On</option>
+                <option value="off" selected>Off</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="cc-included-control">Included usage control</label>
+              <select id="cc-included-control">
+                <option value="off" selected>Off</option>
+                <option value="on">On</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="cc-included-action">When the included cap is reached</label>
+              <select id="cc-included-action">
+                  <option value="unknown" selected>Not available in API inventory</option>
+                  <option value="block">Block additional AI credit usage</option>
+                  <option value="overage">Allow paid overage</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="cc-pool-remaining">Cost center pool remaining, credits</label>
+              <input id="cc-pool-remaining" type="number" min="0" step="1" placeholder="Not inventoried">
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Organization configuration</h3>
+          <div class="settings-grid">
+            <div class="field">
+              <label for="org-name">Organization name</label>
+              <input id="org-name" placeholder="Optional">
+            </div>
+            <div class="field">
+              <label for="org-budget">Organization Copilot budget, USD</label>
+              <input id="org-budget" type="number" min="0" step="1" placeholder="Not set">
+            </div>
+            <div class="field">
+              <label for="org-consumed">Organization metered spend, USD</label>
+              <input id="org-consumed" type="number" min="0" step="0.01" placeholder="Unknown">
+            </div>
+            <div class="field">
+              <label for="org-stop">Organization hard stop</label>
+              <select id="org-stop">
+                <option value="on" selected>On</option>
+                <option value="off">Off</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>User profiles</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Consumed USD</th>
+                  <th>Individual budget USD</th>
+                  <th>Cost center</th>
+                  <th>Organization</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="user-rows"></tbody>
+            </table>
+          </div>
+          <div class="actions" style="margin-top: 12px;">
+            <button id="add-user" class="secondary" type="button">Add user profile</button>
+            <button id="reset" class="secondary" type="button">Reset observed settings</button>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    </section>
+
+    <section id="guidance-panel" class="tabpanel knowledge" role="tabpanel" aria-labelledby="tab-guidance" hidden>
+      <div class="hero">
+        <h2 id="guidance-title">Budget analysis and recommendations</h2>
+        <p class="lede">Run Inventory first. Recommendations must be based on the active enterprise, current GitHub data, and current official guidance.</p>
+      </div>
+
+      <div class="knowledge-grid">
+        <article class="card wide">
+          <h3>Safe assessment sequence</h3>
+          <ol>
+            <li>Run Inventory for the active enterprise.</li>
+            <li>Check prerequisites and confirm the snapshot matches the enterprise opened in the canvas.</li>
+            <li>Review budget precedence, included usage, paid overage, exclusions, hard stops, and assignment data.</li>
+            <li>Use the rules based or AI assessment to create recommendations from current evidence.</li>
+            <li>Validate each action against current documentation and obtain approval before any write.</li>
+          </ol>
+        </article>
+
+        <article class="card wide">
+          <h3>No bundled recommendation</h3>
+          <p>The distributable canvas contains no enterprise users, budgets, cost centers, identifiers, or usage. Inventory is session scoped and is not committed to the repository.</p>
+          <p>Must and Should actions remain disabled until a live API snapshot matches the active enterprise and the prerequisite check passes.</p>
+        </article>
+
+        <article class="card wide">
+          <h3>GitHub sources</h3>
+          <p>Official guidance describes enterprise and narrower aggregate budgets differently: exclusion guidance says cost center usage counts toward enterprise budgets by default, while the billing flow and optimization guide describe fallback or separate scopes. Confirm the applicable scope in GitHub. A conservative scenario estimate is not proof of actual blocking. Empty explicit alert recipients do not prove that owners or billing managers receive no alerts.</p>
+          <ol>
+            <li><a href="https://docs.github.com/en/enterprise-cloud@latest/copilot/concepts/billing-and-usage/organizations-and-enterprises/budgets">Budgets for usage based billing</a></li>
+            <li><a href="https://docs.github.com/en/copilot/tutorials/budgets/optimizing-your-budget-configuration">Optimizing your budget configuration</a></li>
+          </ol>
+        </article>
+      </div>
+    </section>
+
+    <section id="assessment-panel" class="tabpanel" role="tabpanel" aria-labelledby="tab-assessment" hidden>
+      <div class="assessment-header">
+        <div>
+          <span class="status">Local policy check</span>
+          <h2>Budget configuration assessment</h2>
+          <p class="lede">A deterministic review of the loaded inventory. Use AI assessment when you need a fresh evidence-based interpretation in chat.</p>
+        </div>
+        <div class="action-stack">
+          <button id="ai-assessment" type="button">AI based assessment</button>
+          <a class="button-link" href="https://docs.github.com/en/copilot/tutorials/budgets/optimizing-your-budget-configuration" target="_blank" rel="noreferrer">Open optimization guide</a>
+          <a class="button-link" href="https://docs.github.com/en/enterprise-cloud@latest/copilot/concepts/billing-and-usage/organizations-and-enterprises/budgets" target="_blank" rel="noreferrer">Open budgets guide</a>
+        </div>
+      </div>
+      <div id="assessment-output" aria-live="polite" tabindex="-1"></div>
+      <p class="footer-note" id="assessment-refresh-status" role="status" aria-live="polite">Rules-based assessment ready. No AI request was made.</p>
+      <article class="card" id="operations-section" hidden>
+        <h3>Operation status and recovery</h3>
+        <p class="muted">Review the prepared change before proceeding. The host requests any required approval. Reconcile only reads evidence, it never resends a mutation.</p>
+        <div id="operations-list"></div>
+      </article>
+      <article class="card ai-assessment" id="ai-assessment-output" hidden>
+        <h3>AI based assessment</h3>
+        <pre id="ai-assessment-text"></pre>
+      </article>
+      <article class="card completed-section" id="completed-actions-section" hidden>
+        <h3>Action history</h3>
+        <div class="completed-list" id="completed-actions-list"></div>
+      </article>
+    </section>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="data/current-settings.js"></script>
+  <script src="data/inventory-freshness-status.js"></script>
+  <script src="data/ui-verification-status.js"></script>
+  <script src="data/ui-verifications.js"></script>
+  <script src="data/finops-metrics.js"></script>
+  <script src="data/budget-model.js"></script>
+  <script src="data/assessment-policy.js"></script>
+  <script>
+    const fallbackUsers = [];
+
+    let users = fallbackUsers.map((user) => ({ ...user }));
+
+    const byId = (id) => document.getElementById(id);
+    const numberOrNull = (value) => value === null || value === undefined || String(value).trim() === "" || !Number.isFinite(Number(value))
+      ? null : Number(value);
+    const money = (value) => Number.isFinite(value) ? `$${value.toFixed(2)}` : "Unlimited";
+    const credits = (value) => Number.isFinite(value) ? Math.max(0, Math.floor(value)).toLocaleString() : "Unlimited";
+    const metricText = (metric, formatter) => metric?.state === "available"
+      ? formatter(metric.value)
+      : metric?.state === "unavailable"
+        ? "Unavailable"
+        : "Not inventoried";
+    const completedActions = new Set();
+    const completedActionDetails = new Map();
+    const blockedActions = new Map();
+    const blockedActionDetails = new Map();
+    const waivedActions = new Map();
+    const actionHistory = [];
+    const operations = new Map();
+    const unverifiedActions = new Map();
+    // Keep accepted or uncertain responses locked until saved state catches up.
+    const uncertainRequests = new Map();
+    const readRequests = new Map();
+    const dirtySettings = new Set();
+    let userDrafts = false;
+    let stateRevision = null;
+    let actionStateStatus = "loading";
+    let actionStateMessage = "Loading saved state.";
+    const isStandalone = () => window.location.protocol === "file:";
+    let actionInProgress = false;
+    let prerequisitesChecked = false;
+    let prerequisitesReady = false;
+    let prerequisiteAssessment = {
+      checkedAt: null,
+      order: [
+        "GitHub REST API through gh api",
+        "Authenticated GitHub UI automation",
+        "Guided manual GitHub UI"
+      ],
+      checks: [],
+      capabilities: {},
+      actor: null,
+      enterprise: null,
+      credentialSource: "Unknown",
+      status: "unavailable"
+    };
+    let currentRecommendations = { must: [], should: [], could: [], notNow: [] };
+    const FRESHNESS_REFRESH_INTERVAL_MS = 60 * 1000;
+    let freshnessTimer = null;
+    let inventoryFreshnessState = {
+      status: "stale",
+      isUsable: false,
+      reason: "missing",
+      generatedAt: null,
+      ageMs: null,
+      expiresAt: null,
+      nextRefreshAt: null,
+      thresholds: { expiringAfterMs: 20 * 60 * 60 * 1000, staleAfterMs: 24 * 60 * 60 * 1000 }
+    };
+    let uiVerificationState = {
+      status: "stale",
+      isUsable: false,
+      reason: "missing",
+      verifiedAt: null,
+      expiresAt: null
+    };
+
+    function capabilityReady(capability) {
+      return capability?.available === true && capability.authenticated === true && capability.authorised === true;
+    }
+
+    function actionCapabilityReady(kind) {
+      if (!prerequisitesReady) return false;
+      if (kind === "read-only") return true;
+      // The generic UI check does not attest to mutation permissions.
+      return capabilityReady(prerequisiteAssessment.capabilities.apiWrite);
+    }
+
+    function operationForAction(id) {
+      return [...operations.values()].reverse().find((operation) => operation.actionId === id);
+    }
+
+    function operationPending(operation) {
+      return ["queued", "running", "awaiting-approval"].includes(operation?.status);
+    }
+
+    function actionPending(id) {
+      return [...operations.values(), ...uncertainRequests.values()]
+        .some((operation) => operation.actionId === id && operationPending(operation));
+    }
+
+    function hasPendingMutation() {
+      return [...operations.values(), ...uncertainRequests.values()]
+        .some((operation) => operation.actionKind !== "read-only" && operationPending(operation));
+    }
+
+    function operationNeedsRecovery(operation) {
+      if (!operation) return false;
+      if (operationPending(operation)) return false;
+      if (["blocked", "failed", "cancelled"].includes(operation.status)) {
+        const dispatchEvidence = [operation.dispatched, operation.outcome?.dispatched];
+        return !dispatchEvidence.includes(false) || dispatchEvidence.includes(true);
+      }
+      return !["prepared", "completed", "denied", "expired", "needs_decision", "needs-decision"].includes(operation.status);
+    }
+
+    function actionUnverified(id) {
+      return operationNeedsRecovery(uncertainRequests.get(id)) || unverifiedActions.has(id)
+        || [...unverifiedActions.values()].some((entry) => entry.actionId === id)
+        || [...operations.values()].some((operation) => operation.actionId === id
+          && (operationNeedsRecovery(operation) || operation.status === "completed" && !completedActions.has(id)));
+    }
+
+    function hasAmbiguousMutation() {
+      return [...unverifiedActions.values()].some((entry) => entry.actionKind !== "read-only")
+        || [...uncertainRequests.values()].some((entry) => entry.actionKind !== "read-only" && operationNeedsRecovery(entry))
+        || [...operations.values()].some((entry) => entry.actionKind !== "read-only"
+          && (operationNeedsRecovery(entry) || entry.status === "completed" && !completedActions.has(entry.actionId)));
+    }
+
+    function captureFocus() {
+      const element = document.activeElement;
+      if (!element) return () => {};
+      const id = element.id;
+      const actionId = element.dataset?.actionId;
+      const operationId = element.dataset?.operationId;
+      const className = ["proceed-button", "waive-button", "explain-button", "reconcile-button"]
+        .find((name) => element.classList?.contains(name));
+      const userField = element.dataset?.field;
+      const userIndex = element.dataset?.index;
+      if (!id && !actionId && !operationId && !userField) return () => {};
+      const selection = [element.selectionStart, element.selectionEnd];
+      return () => {
+        let target = id ? byId(id) : null;
+        if (!target && className) {
+          target = [...document.querySelectorAll(`.${className}`)].find((candidate) =>
+            actionId ? candidate.dataset.actionId === actionId : candidate.dataset.operationId === operationId);
+        }
+        if (!target && userField) {
+          target = [...byId("user-rows").querySelectorAll("input")].find((candidate) =>
+            candidate.dataset.field === userField && candidate.dataset.index === userIndex);
+        }
+        if (!target || target.disabled) target = byId("assessment-output");
+        if (target !== document.activeElement) target.focus?.({ preventScroll: true });
+        if (Number.isInteger(selection[0]) && target.setSelectionRange) {
+          try { target.setSelectionRange(...selection); } catch { /* Number inputs have no text selection. */ }
+        }
+      };
+    }
+
+    function applySnapshotPreservingDrafts(snapshot) {
+      const restoreFocus = captureFocus();
+      syncUsersFromTable();
+      const drafts = [...dirtySettings].map((id) => [id, byId(id)?.value]);
+      const draftedUsers = userDrafts ? users.map((user) => ({ ...user })) : null;
+      window.GITHUB_BILLING_SNAPSHOT = snapshot ?? neutralSnapshot();
+      applySnapshot();
+      drafts.forEach(([id, value]) => { if (byId(id)) byId(id).value = value; });
+      if (draftedUsers) users = draftedUsers;
+      renderUsers();
+      refreshKnownUsers();
+      refreshSelectedAdvisor();
+      restoreFocus();
+    }
+
+    function neutralSnapshot() {
+      return { schemaVersion: 2, source: "bootstrap", enterprise: null, generatedAt: null, budgets: [], costCenters: [], enterpriseTeams: [] };
+    }
+
+    function refreshSelectedAdvisor() {
+      if (byId("username").value.trim()) calculate();
+      else byId("result").innerHTML = '<div class="empty">Enter a username, then select <strong>Calculate budget</strong>.</div>';
+    }
+
+    function hasLiveInventory() {
+      return inventoryFreshnessState.isUsable;
+    }
+
+    function freshnessLabel(status) {
+      return status === "fresh" ? "Fresh" : status === "expiring" ? "Expiring" : "Stale";
+    }
+
+    function formatDuration(milliseconds) {
+      if (!Number.isFinite(milliseconds) || milliseconds < 0) return "unknown";
+      const minutes = Math.floor(milliseconds / (60 * 1000));
+      if (minutes < 1) return "less than 1 minute";
+      if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"}`;
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      return remainingMinutes
+        ? `${hours} hour${hours === 1 ? "" : "s"} ${remainingMinutes} minute${remainingMinutes === 1 ? "" : "s"}`
+        : `${hours} hour${hours === 1 ? "" : "s"}`;
+    }
+
+    function setFreshnessBadge(element, state, subject) {
+      const label = freshnessLabel(state.status);
+      element.className = `verification-status freshness-status ${state.status}`;
+      element.textContent = label;
+      element.setAttribute("aria-label", `${subject}: ${label}`);
+    }
+
+    function updateInventoryFreshnessStatus(snapshot = window.GITHUB_BILLING_SNAPSHOT, now = Date.now()) {
+      const evaluator = window.CANVAS_INVENTORY_FRESHNESS?.evaluateInventoryFreshness;
+      const expectedEnterprise = window.CANVAS_CONFIG?.enterprise;
+      inventoryFreshnessState = evaluator
+        ? evaluator(snapshot, expectedEnterprise, now, window.CANVAS_CONFIG?.inventoryFreshness)
+        : { ...inventoryFreshnessState, status: "stale", isUsable: false, reason: "missing" };
+
+      setFreshnessBadge(byId("inventory-freshness-status"), inventoryFreshnessState, "API snapshot freshness");
+      const generated = inventoryFreshnessState.generatedAt
+        ? new Date(inventoryFreshnessState.generatedAt).toLocaleString()
+        : "unknown";
+      const age = formatDuration(inventoryFreshnessState.ageMs);
+      const thresholds = inventoryFreshnessState.thresholds;
+      byId("inventory-freshness-thresholds").textContent =
+        `Configured thresholds: Fresh before ${formatDuration(thresholds.expiringAfterMs)}, Expiring from ${formatDuration(thresholds.expiringAfterMs)} to ${formatDuration(thresholds.staleAfterMs)}, Stale at ${formatDuration(thresholds.staleAfterMs)}.`;
+      byId("inventory-next-refresh").textContent = inventoryFreshnessState.nextRefreshAt
+        ? `Next required refresh: ${new Date(inventoryFreshnessState.nextRefreshAt).toLocaleString()}.`
+        : "Next required refresh is unavailable until a matching API snapshot is loaded.";
+
+      let detail;
+      if (inventoryFreshnessState.isUsable) {
+        detail = `Generated ${generated}. Current age ${age}.`;
+      } else if (inventoryFreshnessState.reason === "enterprise-mismatch") {
+        detail = `Snapshot is for ${snapshot?.enterprise || "an unknown enterprise"}, but the active enterprise is ${expectedEnterprise || "unknown"}.`;
+      } else if (inventoryFreshnessState.reason === "clock-skew") {
+        detail = `Generated time ${generated} is in the future. Refresh inventory after correcting the clock.`;
+      } else if (["missing-timestamp", "invalid-timestamp"].includes(inventoryFreshnessState.reason)) {
+        detail = "The API snapshot has no valid generated time. Refresh inventory.";
+      } else if (inventoryFreshnessState.reason === "stale") {
+        detail = `Generated ${generated}. Current age ${age}. The API snapshot has expired.`;
+      } else {
+        detail = "No usable API snapshot is available. Refresh inventory.";
+      }
+      byId("inventory-freshness-detail").textContent = detail;
+
+      const header = byId("data-source-status");
+      const label = freshnessLabel(inventoryFreshnessState.status);
+      header.className = `status freshness-status ${inventoryFreshnessState.status}`;
+      header.textContent = inventoryFreshnessState.isUsable
+        ? `${label}, API snapshot generated ${generated}, age ${age}, refresh by ${new Date(inventoryFreshnessState.nextRefreshAt).toLocaleString()}`
+        : inventoryFreshnessState.reason === "enterprise-mismatch"
+          ? `Stale, Inventory required for ${expectedEnterprise || "the active enterprise"}`
+          : inventoryFreshnessState.reason === "stale"
+            ? `Inventory stale for ${expectedEnterprise || "the active enterprise"}, generated ${generated}, age ${age}, refresh required`
+            : "Stale, Inventory required";
+      header.setAttribute("aria-label", header.textContent);
+    }
+
+    function updateUiVerificationStatus(snapshot = window.GITHUB_BILLING_SNAPSHOT, now = Date.now()) {
+      const expectedEnterprise = window.CANVAS_CONFIG?.enterprise || snapshot?.enterprise;
+      const evaluator = window.CANVAS_UI_VERIFICATION_STATUS?.evaluateUiVerification;
+      uiVerificationState = evaluator
+        ? evaluator(window.CANVAS_UI_VERIFICATIONS, expectedEnterprise, now)
+        : {
+            status: "stale",
+            isUsable: false,
+            reason: "missing",
+            verifiedAt: null,
+            expiresAt: null
+          };
+
+      const status = byId("ui-verification-status");
+      setFreshnessBadge(status, uiVerificationState, "UI verification freshness");
+
+      const verification = window.CANVAS_UI_VERIFICATIONS;
+      let detail;
+      if (uiVerificationState.isUsable) {
+        detail = `Verified ${new Date(uiVerificationState.verifiedAt).toLocaleString()}. Expires ${new Date(uiVerificationState.expiresAt).toLocaleString()}.`;
+      } else if (uiVerificationState.reason === "enterprise-mismatch") {
+        detail = `Verification is for ${verification?.enterprise || "an unknown enterprise"}, but inventory is for ${expectedEnterprise || "an unknown enterprise"}. UI only facts are unknown.`;
+      } else if (uiVerificationState.reason === "expired") {
+        detail = `Verification expired ${new Date(uiVerificationState.expiresAt).toLocaleString()}. UI only facts are unknown.`;
+      } else {
+        detail = "No usable UI verification is available. UI only facts are unknown.";
+      }
+      byId("ui-verification-detail").textContent = detail;
+    }
+
+    function refreshFreshnessStatuses(now = Date.now()) {
+      const previousInventory = `${inventoryFreshnessState.status}:${inventoryFreshnessState.isUsable}`;
+      const previousVerification = `${uiVerificationState.status}:${uiVerificationState.isUsable}`;
+      updateInventoryFreshnessStatus(window.GITHUB_BILLING_SNAPSHOT, now);
+      updateUiVerificationStatus(window.GITHUB_BILLING_SNAPSHOT, now);
+      const changed = previousInventory !== `${inventoryFreshnessState.status}:${inventoryFreshnessState.isUsable}`
+        || previousVerification !== `${uiVerificationState.status}:${uiVerificationState.isUsable}`;
+      if (changed) {
+        runAssessment();
+        refreshSelectedAdvisor();
+      }
+    }
+
+    function verifiedIncludedUsageAction(costCenterName) {
+      if (!uiVerificationState.isUsable) return null;
+      const action = window.CANVAS_UI_VERIFICATIONS?.costCenters?.[costCenterName]?.includedUsageAction;
+      return ["block", "overage"].includes(action) ? action : null;
+    }
+
+    const { isAiBudget, findBudget, availableAmount, budgetEntityName, explicitSeatOrganization, buildCostCenterUserMap, buildEffectiveBudgetChains } = window.CANVAS_BUDGET_MODEL;
+
+    function budgetAmountText(value) {
+      if (value?.state === "available") return money(value.amount);
+      if (value?.state === "unverified") return Number.isFinite(value.amount)
+        ? `${money(value.amount)} observed, effective allowance unverified` : "Unverified";
+      if (value?.state === "not_applicable") return "Not applicable";
+      return "Unavailable";
+    }
+
+    function applySnapshot() {
+      const snapshot = window.GITHUB_BILLING_SNAPSHOT;
+      updateInventoryFreshnessStatus(snapshot);
+      updateUiVerificationStatus(snapshot);
+      const selectedName = byId("cc-name").value.trim();
+      for (const id of ["universal-budget", "pool-remaining", "enterprise-budget", "enterprise-consumed", "cc-name",
+        "cc-user-budget", "cc-spending-budget", "cc-spending-consumed", "cc-pool-remaining", "org-name", "org-budget", "org-consumed"]) {
+        byId(id).value = "";
+      }
+      for (const id of ["enterprise-stop", "cc-stop", "org-stop", "cc-included-control"]) byId(id).value = "off";
+      byId("cc-included-action").value = "unknown";
+      users = [];
+      if (!snapshot || ![1, 2].includes(snapshot.schemaVersion)) return;
+
+      const budgets = Array.isArray(snapshot.budgets) ? snapshot.budgets : [];
+      const costCenters = Array.isArray(snapshot.costCenters) ? snapshot.costCenters : [];
+      const selectedCostCenter = costCenters.find((center) => center.name === selectedName)
+        || costCenters.find((center) => center.ai_credit_pool_enabled)
+        || costCenters[0];
+      const universal = findBudget(budgets, "multi_user_customer");
+      const enterprise = findBudget(budgets, "enterprise");
+      const costCenterUser = selectedCostCenter
+        ? findBudget(budgets, "multi_user_cost_center", selectedCostCenter.name)
+        : null;
+      const costCenterSpend = selectedCostCenter
+        ? findBudget(budgets, "cost_center", selectedCostCenter.name)
+        : null;
+
+      users = buildEffectiveBudgetChains(snapshot).map((chain) => ({
+        username: chain.username,
+        consumed: chain.userConsumption.state === "available" ? chain.userConsumption.amount : null,
+        individualBudget: chain.individualUserBudget.state === "available"
+          ? chain.individualUserBudget.amount
+          : null,
+        costCenter: chain.costCenter.name || "",
+        organization: chain.organization.name || ""
+      }));
+      if (universal) byId("universal-budget").value = String(availableAmount(universal.budget_amount).amount ?? "");
+      if (enterprise) {
+        byId("enterprise-budget").value = String(availableAmount(enterprise.budget_amount).amount ?? "");
+        byId("enterprise-consumed").value = availableAmount(enterprise.consumed_amount).state === "available"
+          ? String(enterprise.consumed_amount)
+          : "";
+        byId("enterprise-stop").value = enterprise.prevent_further_usage ? "on" : "off";
+      }
+      if (selectedCostCenter) {
+        byId("cc-name").value = selectedCostCenter.name;
+        byId("cc-included-control").value = selectedCostCenter.ai_credit_pool_enabled ? "on" : "off";
+        const target = availableAmount(selectedCostCenter.ai_credit_pool_state?.target_amount);
+        const current = availableAmount(selectedCostCenter.ai_credit_pool_state?.current_amount);
+        byId("cc-pool-remaining").value = target.state === "available" && current.state === "available"
+          ? String(Math.max(0, target.amount - current.amount))
+          : "";
+        byId("cc-included-action").value = verifiedIncludedUsageAction(selectedCostCenter.name) || "unknown";
+      }
+      if (costCenterUser) byId("cc-user-budget").value = String(availableAmount(costCenterUser.budget_amount).amount ?? "");
+      if (costCenterSpend) {
+        byId("cc-spending-budget").value = String(availableAmount(costCenterSpend.budget_amount).amount ?? "");
+        byId("cc-spending-consumed").value = availableAmount(costCenterSpend.consumed_amount).state === "available"
+          ? String(costCenterSpend.consumed_amount)
+          : "";
+        byId("cc-stop").value = costCenterSpend.prevent_further_usage ? "on" : "off";
+      }
+
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function renderUsers() {
+      const tbody = byId("user-rows");
+      tbody.innerHTML = users.map((user, index) => `
+        <tr>
+          <td><input data-index="${index}" data-field="username" value="${escapeHtml(user.username)}" aria-label="Username"></td>
+          <td><input data-index="${index}" data-field="consumed" type="number" min="0" step="0.01" value="${user.consumed ?? ""}" aria-label="Consumed USD"></td>
+          <td><input data-index="${index}" data-field="individualBudget" type="number" min="0" step="1" value="${user.individualBudget ?? ""}" aria-label="Individual budget USD"></td>
+          <td><input data-index="${index}" data-field="costCenter" value="${escapeHtml(user.costCenter)}" placeholder="No visible assignment" aria-label="Cost center"></td>
+          <td><input data-index="${index}" data-field="organization" value="${escapeHtml(user.organization)}" placeholder="Not assigned" aria-label="Organization"></td>
+          <td><button class="secondary remove-user" data-index="${index}" type="button">Remove</button></td>
+        </tr>
+      `).join("");
+
+      tbody.querySelectorAll("input").forEach((input) => {
+        input.addEventListener("change", (event) => {
+          userDrafts = true;
+          const index = Number(event.target.dataset.index);
+          const field = event.target.dataset.field;
+          users[index][field] = ["consumed", "individualBudget"].includes(field)
+            ? numberOrNull(event.target.value)
+            : event.target.value.trim();
+          refreshKnownUsers();
+        });
+      });
+
+      tbody.querySelectorAll(".remove-user").forEach((button) => {
+        button.addEventListener("click", () => {
+          userDrafts = true;
+          users.splice(Number(button.dataset.index), 1);
+          renderUsers();
+          refreshKnownUsers();
+        });
+      });
+    }
+
+    function refreshKnownUsers() {
+      byId("known-users").innerHTML = users
+        .filter((user) => user.username)
+        .map((user) => `<option value="${escapeHtml(user.username)}"></option>`)
+        .join("");
+    }
+
+    function readSettings() {
+      const tristate = (id) => byId(id).value === "on" ? true : byId(id).value === "off" ? false : null;
+      return {
+        universalBudget: numberOrNull(byId("universal-budget").value),
+        poolRemainingCredits: numberOrNull(byId("pool-remaining").value),
+        paidUsage: tristate("paid-usage"),
+        budgetObjective: ["monitor", "hard_cap"].includes(byId("budget-objective").value) ? byId("budget-objective").value : "unknown",
+        enterpriseBudget: numberOrNull(byId("enterprise-budget").value),
+        enterpriseConsumed: numberOrNull(byId("enterprise-consumed").value),
+        enterpriseStop: byId("enterprise-stop").value === "on",
+        excludeCostCenters: tristate("exclude-cost-centers"),
+        costCenter: {
+          name: byId("cc-name").value.trim(),
+          userBudget: numberOrNull(byId("cc-user-budget").value),
+          spendingBudget: numberOrNull(byId("cc-spending-budget").value),
+          consumed: numberOrNull(byId("cc-spending-consumed").value),
+          stop: byId("cc-stop").value === "on",
+          includedControl: byId("cc-included-control").value === "on",
+          includedAction: byId("cc-included-action").value,
+          poolRemainingCredits: numberOrNull(byId("cc-pool-remaining").value)
+        },
+        organization: {
+          name: byId("org-name").value.trim(),
+          budget: numberOrNull(byId("org-budget").value),
+          consumed: numberOrNull(byId("org-consumed").value),
+          stop: byId("org-stop").value === "on"
+        }
+      };
+    }
+
+    function scenarioSelection(settings = readSettings()) {
+      return {
+        ...(typeof settings.paidUsage === "boolean" ? { paidUsage: settings.paidUsage } : {}),
+        budgetObjective: settings.budgetObjective,
+        ...(settings.costCenter.name ? { costCenterName: settings.costCenter.name } : {})
+      };
+    }
+
+    function interpretationNote() {
+      return '<p class="warning">Official aggregate scope descriptions conflict. The budgets guide describes both default enterprise inclusion and a fallback billing flow; the optimization guide describes separate enterprise and cost center scopes. Exclusion and complete applicable coverage remain unverified. Observations and scenario estimates do not guarantee actual blocking. <a href="https://docs.github.com/en/enterprise-cloud@latest/copilot/concepts/billing-and-usage/organizations-and-enterprises/budgets" target="_blank" rel="noreferrer">Budgets guide</a>; <a href="https://docs.github.com/en/copilot/tutorials/budgets/optimizing-your-budget-configuration" target="_blank" rel="noreferrer">Optimization guide</a>.</p>';
+    }
+
+    function costCenterLabel(costCenter) {
+      return costCenter.state === "not_assigned" ? "No visible assignment" : costCenter.name || "Unavailable";
+    }
+
+    function renderEffectiveBudgetChainDetail(chain) {
+      const aggregateRows = chain.aggregateCandidates.length
+        ? chain.aggregateCandidates.map((candidate) => `
+            <li>
+              ${escapeHtml(candidate.source)} (${escapeHtml(candidate.scope)}):
+              budget ID ${escapeHtml(candidate.budgetId ?? "unavailable")};
+              type ${escapeHtml(candidate.budgetType ?? "unavailable")};
+              SKU ${escapeHtml(candidate.sku ?? "unavailable")};
+              ${Number.isFinite(candidate.amount) ? money(candidate.amount) : "amount unavailable"};
+              ${Number.isFinite(candidate.consumed) ? `${money(candidate.consumed)} consumed` : "consumption unavailable"};
+              ${Number.isFinite(candidate.remaining) ? `${money(candidate.remaining)} observed remainder` : "remaining amount unavailable"};
+              ${candidate.hardStop === true ? "hard stop observed" : candidate.hardStop === false ? "monitoring only" : "hard stop unknown"};
+              applicability ${escapeHtml(candidate.applicability || "unverified")}.
+            </li>
+          `).join("")
+        : "<li>No supported aggregate AI credit budget was returned for this mapping. This does not prove that no budget applies.</li>";
+      const unresolvedRows = (chain.unclassifiedBudgets || []).map((budget) => `
+          <li>
+            budget ID ${escapeHtml(budget.budgetId ?? "unavailable")};
+            type ${escapeHtml(budget.budgetType ?? "unavailable")};
+            SKU ${escapeHtml(budget.sku ?? "unavailable")};
+            scope ${escapeHtml(budget.scope ?? "unavailable")};
+            entity ${escapeHtml(budget.entity || "unavailable")};
+            raw budget_amount: ${Number.isFinite(budget.amount) ? escapeHtml(budget.amount) : "unavailable"};
+            raw consumed_amount: ${Number.isFinite(budget.consumed) ? escapeHtml(budget.consumed) : "unavailable"};
+            units and interpretation unverified;
+            ${budget.hardStop === true ? "hard stop observed" : budget.hardStop === false ? "monitoring only" : "hard stop unknown"}.
+          </li>
+        `).join("");
+      const coverageVerified = chain.coverage?.state === "verified";
+      const lowest = coverageVerified && chain.lowestRemainingHeadroom.state === "available"
+        ? `${money(chain.lowestRemainingHeadroom.amount)} from ${chain.lowestRemainingHeadroom.limitedBy}`
+        : "Unavailable, applicable coverage is unverified";
+      byId("result").innerHTML = `
+        <h2>${escapeHtml(chain.username)}</h2>
+        <p class="muted">Freshness describes the snapshot age, not complete billing coverage. Returned per-user and aggregate amounts are observations, not a verified allowance.</p>
+        <div class="metric"><span>Individual user budget</span><strong>${budgetAmountText(chain.individualUserBudget)}</strong></div>
+        <div class="metric"><span>Cost center</span><strong>${escapeHtml(costCenterLabel(chain.costCenter))}</strong></div>
+        ${chain.costCenter.state === "not_assigned" ? '<p class="muted">No assignment was returned in the visible inventory. Other assignments may not be visible.</p>' : ""}
+        <div class="metric"><span>Cost center per-user budget</span><strong>${budgetAmountText(chain.costCenterUserBudget)}</strong></div>
+        <div class="metric"><span>Universal per-user budget</span><strong>${budgetAmountText(chain.universalUserBudget)}</strong></div>
+        <div class="metric"><span>Observed precedence candidate</span><strong>${budgetAmountText(chain.effectiveUserBudget)}</strong></div>
+        <div class="metric"><span>Candidate source</span><strong>${escapeHtml(chain.effectiveUserBudget.source || "Unavailable")}</strong></div>
+        <div class="metric"><span>Verified effective allowance</span><strong>${coverageVerified ? budgetAmountText(chain.effectiveUserBudget) : "Unknown, complete applicable coverage is unverified"}</strong></div>
+        <div class="metric"><span>Recorded user consumption</span><strong>${budgetAmountText(chain.userConsumption)}</strong></div>
+        <div class="metric"><span>Observed user budget remainder</span><strong>${budgetAmountText(chain.userRemaining)}</strong></div>
+        <div class="metric"><span>Lowest remaining hard-stop headroom</span><strong>${escapeHtml(lowest)}</strong></div>
+        <p class="warning">Coverage: ${escapeHtml(chain.coverage?.state || "unverified")}. ${escapeHtml(chain.coverage?.reason || "Complete inventory coverage has not been proven.")}</p>
+        ${(chain.interpretationWarnings || []).map((warning) => `<p class="warning">${escapeHtml(warning)}</p>`).join("")}
+        <p>Aggregate interpretation: ${escapeHtml(chain.aggregateMeteredBudget.state)}. ${escapeHtml(chain.aggregateMeteredBudget.reason || "No verified effective aggregate allowance.")}</p>
+        ${interpretationNote()}
+        <h3 style="margin-top: 16px;">Aggregate metered spending chain</h3>
+        <ol class="trace">${aggregateRows}</ol>
+        ${unresolvedRows ? `
+          <h3>UNRESOLVED observed controls</h3>
+          <p class="warning">These potentially applicable controls include mixed product or unsupported AI budgets. Their applicability and effect on usable credits are unresolved; excluding them from the supported chain does not prove they are irrelevant.</p>
+          <ol class="trace">${unresolvedRows}</ol>
+        ` : ""}
+      `;
+    }
+
+    function calculate() {
+      syncUsersFromTable();
+      updateInventoryFreshnessStatus();
+      const username = byId("username").value.trim();
+      if (!username) {
+        byId("result").innerHTML = `<div class="warning danger">Enter a GitHub username.</div>`;
+        return;
+      }
+
+      const live = hasLiveInventory();
+      if (!live && (!isStandalone() || window.GITHUB_BILLING_SNAPSHOT?.source === "gh-api")) {
+        byId("result").innerHTML = `<h2>${escapeHtml(username)}</h2><div class="warning">Inventory unavailable or stale. Refresh saved state and inventory before using observed allowance or consumption figures. No current effective allowance is established.</div>`;
+        return;
+      }
+      const inventoriedChain = live && buildEffectiveBudgetChains(window.GITHUB_BILLING_SNAPSHOT)
+        .find((chain) => chain.username.toLowerCase() === username.toLowerCase());
+      if (inventoriedChain) {
+        renderEffectiveBudgetChainDetail(inventoriedChain);
+        return;
+      }
+      if (live) {
+        byId("result").innerHTML = `
+          <h2>${escapeHtml(username)}</h2>
+          <div class="warning">This user is not in the inventory snapshot. Budget mappings, consumption, and remaining headroom are unavailable.</div>
+        `;
+        return;
+      }
+
+      const settings = readSettings();
+      const stored = users.find((user) => user.username.toLowerCase() === username.toLowerCase());
+      const user = stored
+        ? { ...stored }
+        : { username, consumed: null, individualBudget: null, costCenter: "", organization: "" };
+
+      const costCenterApplies = Boolean(
+        user.costCenter &&
+        settings.costCenter.name &&
+        user.costCenter.toLowerCase() === settings.costCenter.name.toLowerCase()
+      );
+      const organizationApplies = Boolean(
+        user.organization &&
+        settings.organization.name &&
+        user.organization.toLowerCase() === settings.organization.name.toLowerCase()
+      );
+
+      let userBudget = null;
+      let userBudgetSource = "No user-level budget";
+      if (Number.isFinite(user.individualBudget)) {
+        userBudget = user.individualBudget;
+        userBudgetSource = "Individual user budget";
+      } else if (costCenterApplies && settings.costCenter.userBudget !== null) {
+        userBudget = settings.costCenter.userBudget;
+        userBudgetSource = "Cost center user budget";
+      } else if (settings.universalBudget !== null) {
+        userBudget = settings.universalBudget;
+        userBudgetSource = "Universal user budget";
+      }
+
+      const userConsumption = numberOrNull(user.consumed);
+      const userRemaining = userConsumption === null ? null : userBudget === null
+        ? Infinity : Math.max(0, userBudget - userConsumption);
+
+      const poolSource = costCenterApplies && settings.costCenter.includedControl
+        ? `${settings.costCenter.name} included usage control`
+        : "Enterprise shared pool";
+      const poolRemainingCredits = costCenterApplies && settings.costCenter.includedControl
+        ? settings.costCenter.poolRemainingCredits
+        : settings.poolRemainingCredits;
+      const poolInventoried = poolRemainingCredits !== null;
+      const poolRemainingDollars = poolInventoried ? poolRemainingCredits / 100 : null;
+
+      const hardCaps = [];
+      const unknownHardCaps = [];
+      const monitoringBudgets = [];
+
+      if (costCenterApplies && settings.costCenter.spendingBudget !== null) {
+        const remaining = settings.costCenter.consumed === null
+          ? null
+          : Math.max(0, settings.costCenter.spendingBudget - settings.costCenter.consumed);
+        if (settings.costCenter.stop && remaining !== null) {
+          hardCaps.push({ name: "Cost center spending budget", remaining });
+        } else if (settings.costCenter.stop) {
+          unknownHardCaps.push("Cost center spending budget consumption is unknown");
+        } else {
+          monitoringBudgets.push("Cost center spending budget has no hard stop");
+        }
+      }
+
+      if (!costCenterApplies && organizationApplies && settings.organization.budget !== null) {
+        const remaining = settings.organization.consumed === null
+          ? null
+          : Math.max(0, settings.organization.budget - settings.organization.consumed);
+        if (settings.organization.stop && remaining !== null) {
+          hardCaps.push({ name: "Organization spending budget", remaining });
+        } else if (settings.organization.stop) {
+          unknownHardCaps.push("Organization spending budget consumption is unknown");
+        } else {
+          monitoringBudgets.push("Organization spending budget has no hard stop");
+        }
+      }
+
+      const exclusionUnknown = costCenterApplies && settings.enterpriseBudget !== null && settings.excludeCostCenters === null;
+      const enterpriseApplies = !costCenterApplies || settings.excludeCostCenters !== true;
+      if (enterpriseApplies && settings.enterpriseBudget !== null) {
+        const remaining = settings.enterpriseConsumed === null
+          ? null
+          : Math.max(0, settings.enterpriseBudget - settings.enterpriseConsumed);
+        if (settings.enterpriseStop && remaining !== null) {
+          hardCaps.push({ name: "Enterprise spending budget", remaining });
+        } else if (settings.enterpriseStop) {
+          unknownHardCaps.push("Enterprise spending budget consumption is unknown");
+        } else {
+          monitoringBudgets.push("Enterprise spending budget has no hard stop");
+        }
+      }
+
+      const bindingMetered = hardCaps.length
+        ? hardCaps.reduce((lowest, item) => item.remaining < lowest.remaining ? item : lowest)
+        : null;
+      const includedCapBlocks = Boolean(
+        costCenterApplies &&
+        settings.costCenter.includedControl &&
+        settings.costCenter.includedAction === "block"
+      );
+      const includedActionUnknown = costCenterApplies && settings.costCenter.includedControl
+        && !["block", "overage"].includes(settings.costCenter.includedAction);
+      const meteredRemaining = includedActionUnknown ? null : includedCapBlocks || settings.paidUsage === false ? 0
+        : settings.paidUsage === null || unknownHardCaps.length || exclusionUnknown ? null
+          : settings.paidUsage === true
+          ? (bindingMetered ? bindingMetered.remaining : Infinity)
+          : 0;
+      const totalFundingRemaining = poolInventoried && meteredRemaining !== null ? poolRemainingDollars + meteredRemaining : null;
+      const usableRemainingDollars = totalFundingRemaining === null || userRemaining === null
+        ? null
+        : Math.min(userRemaining, totalFundingRemaining);
+      const usableRemainingCredits = usableRemainingDollars === null ? null : usableRemainingDollars * 100;
+
+      const warnings = [];
+      if (!stored) {
+        warnings.push("No saved profile was found. User consumption and the combined usable amount are unknown.");
+      }
+      if (stored && !user.costCenter && settings.costCenter.name) {
+        warnings.push("The calculator has no expanded cost center or enterprise team mapping for this user.");
+      }
+      if (costCenterApplies && settings.excludeCostCenters && settings.costCenter.spendingBudget === null) {
+        warnings.push("The standalone scenario assumes this cost center is excluded and supplies no cost center spending budget. This does not establish actual aggregate coverage.");
+      }
+      if (includedCapBlocks) {
+        warnings.push("The scenario's included usage control blocks future usage after the remaining included allocation. A paid budget cannot extend this scenario estimate beyond that allocation.");
+      }
+      if (includedActionUnknown) warnings.push("The included usage action is unknown. The combined usable total is unavailable; paid overage is not assumed.");
+      if (settings.paidUsage === null) warnings.push("Paid usage is an unknown operator assumption, not an observed policy.");
+      if (exclusionUnknown) warnings.push("Selected cost center exclusion is unknown. Aggregate metered coverage is unresolved.");
+      if (userConsumption === null) warnings.push("User consumption is unknown, not zero. Remaining user headroom is unavailable.");
+      warnings.push(...unknownHardCaps);
+      if (monitoringBudgets.length) {
+        warnings.push(...monitoringBudgets);
+      }
+      if (!poolInventoried) {
+        warnings.push("The applicable included usage pool was not inventoried, so total remaining headroom is unavailable.");
+      }
+      if (userRemaining === 0) {
+        warnings.push("The entered user budget has no remaining headroom in this scenario. Actual blocking still requires verified coverage.");
+      }
+
+      const meteredText = meteredRemaining === null
+        ? "Unavailable, paid usage or applicable hard stop coverage is unknown"
+        : includedCapBlocks ? "$0.00, the assumed included control blocks paid overage"
+        : settings.paidUsage === false ? "$0.00, paid usage assumed disabled"
+        : bindingMetered
+          ? `${money(bindingMetered.remaining)} from ${bindingMetered.name}`
+          : "No hard stop entered in this scenario, actual coverage unverified";
+
+      const totalText = usableRemainingCredits === null
+        ? "Unavailable, required consumption, included allocation or control assumptions are unknown"
+        : Number.isFinite(usableRemainingCredits)
+        ? `${credits(usableRemainingCredits)} credits, about ${money(usableRemainingDollars)}`
+        : "Unlimited by the entered budgets";
+
+      const trace = [
+        `${userBudgetSource}: ${userBudget === null ? "none entered" : money(userBudget)}. Remaining after recorded user consumption: ${userRemaining === null ? "Unavailable" : money(userRemaining)}.`,
+        `${poolSource}: ${poolInventoried ? `${credits(poolRemainingCredits)} credits remain` : "not inventoried"}.`,
+        settings.paidUsage === null ? "Paid usage policy is unknown."
+          : settings.paidUsage
+          ? includedCapBlocks
+            ? "The assumed included control limits all future usage to the remaining included allocation, even if paid usage is enabled."
+            : `Paid usage is enabled. Metered headroom: ${meteredText}.`
+          : "Paid usage is disabled, so requests stop when the applicable pool is exhausted.",
+        `The lowest remaining headroom determines the estimated usable amount: ${totalText}.`
+      ];
+
+      byId("result").innerHTML = `
+        <h2>${escapeHtml(user.username)}</h2>
+        <p class="warning">Standalone operator scenario. All amounts below are assumption-based estimates, not verified allowances or a guarantee of actual blocking.</p>
+        <div class="metric"><span>Entered user budget</span><strong>${userBudget === null ? "None entered" : money(userBudget)}</strong></div>
+        <div class="metric"><span>Budget source</span><strong>${escapeHtml(userBudgetSource)}</strong></div>
+        <div class="metric"><span>Recorded user consumption</span><strong>${userConsumption === null ? "Unavailable" : money(userConsumption)}</strong></div>
+        <div class="metric"><span>User cap remaining</span><strong>${userRemaining === null ? "Unavailable" : money(userRemaining)}</strong></div>
+        <div class="metric"><span>Pool remaining</span><strong>${poolInventoried ? `${credits(poolRemainingCredits)} credits` : "Not inventoried"}</strong></div>
+        <div class="metric"><span>Metered headroom</span><strong>${escapeHtml(meteredText)}</strong></div>
+        <div class="metric"><span>Estimated usable AI credits</span><strong>${escapeHtml(totalText)}</strong></div>
+        ${warnings.map((warning) => `<div class="warning">${escapeHtml(warning)}</div>`).join("")}
+        ${interpretationNote()}
+        <h3 style="margin-top: 16px;">Calculation trace</h3>
+        <ol class="trace">${trace.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ol>
+      `;
+    }
+
+    function syncUsersFromTable() {
+      byId("user-rows").querySelectorAll("input").forEach((input) => {
+        const index = Number(input.dataset.index);
+        const field = input.dataset.field;
+        users[index][field] = ["consumed", "individualBudget"].includes(field)
+          ? numberOrNull(input.value)
+          : input.value.trim();
+      });
+    }
+
+    function legacyActionId(category, risk, action) {
+      let hash = 2166136261;
+      const value = `${category}:${risk}:${action}`;
+      for (let index = 0; index < value.length; index += 1) {
+        hash ^= value.charCodeAt(index);
+        hash = Math.imul(hash, 16777619);
+      }
+      return `${category}-${(hash >>> 0).toString(16)}`;
+    }
+
+    function actionId(category, item) {
+      const subject = item.subject ? `-${encodeURIComponent(item.subject)}` : "";
+      return `${category}-${item.code}${subject}`;
+    }
+
+    function resolveActionState(category, item, id) {
+      const legacyId = legacyActionId(category, item.risk, item.action);
+      if (completedActions.has(legacyId)) {
+        completedActions.add(id);
+        if (!completedActionDetails.has(id) && completedActionDetails.has(legacyId)) {
+          completedActionDetails.set(id, completedActionDetails.get(legacyId));
+        }
+        completedActions.delete(legacyId);
+        completedActionDetails.delete(legacyId);
+      }
+      if (!blockedActions.has(id) && blockedActions.has(legacyId)) {
+        blockedActions.set(id, blockedActions.get(legacyId));
+        blockedActions.delete(legacyId);
+      }
+      return {
+        completed: completedActions.has(id) && !actionUnverified(id) && !actionPending(id),
+        pending: actionPending(id),
+        unverified: actionUnverified(id),
+        blocked: blockedActions.get(id),
+        waived: waivedActions.get(id)
+      };
+    }
+
+    function isMustResolved(id) {
+      const waiver = waivedActions.get(id);
+      const completion = completedActionDetails.get(id);
+      if (actionUnverified(id) || actionPending(id)) return false;
+      return (completedActions.has(id) && completion?.audit?.complete === true
+          && completion?.verification?.status === "verified" && !["queued", "required"].includes(completion?.refreshStatus))
+        || blockedActionDetails.get(id)?.validation?.beforeDispatch === true
+        || String(waiver?.reason || "").trim().length >= 10;
+    }
+
+    function unresolvedMustDependencies(item, mustItems) {
+      const activeMustIds = new Set(mustItems.map((mustItem) => actionId("must", mustItem)));
+      return (item.dependsOnMust || [])
+        .filter((id) => activeMustIds.has(id) && !isMustResolved(id));
+    }
+
+    function shouldDependencyReason(item, mustItems) {
+      const unresolved = unresolvedMustDependencies(item, mustItems);
+      if (unresolved.length === 0) return "";
+      return `Resolve or waive the related Must action first (${unresolved.length} remaining).`;
+    }
+
+    function actionHelp(action) {
+      const budgetsUrl = "https://docs.github.com/en/copilot/concepts/billing-and-usage/organizations-and-enterprises/budgets";
+      const optimizeUrl = "https://docs.github.com/en/copilot/tutorials/budgets/optimizing-your-budget-configuration";
+      const setupUrl = "https://docs.github.com/en/billing/how-tos/set-up-budgets";
+      const normalized = action.toLowerCase();
+      if (normalized.includes("expiry") || normalized.includes("override")) {
+        return {
+          text: "Individual budgets override cost center and universal limits. Expiry dates return temporary exceptions to the broader default.",
+          url: `${budgetsUrl}#expiration-dates-for-individual-user-level-budgets`
+        };
+      }
+      if (normalized.includes("included usage") || normalized.includes("keep the block") || normalized.includes("controlled paid overage")) {
+        return {
+          text: "Included usage controls decide whether a cost center stops at its licence-funded pool or moves into paid overage.",
+          url: `${budgetsUrl}#included-usage-controls-for-cost-centers`
+        };
+      }
+      if (normalized.includes("exclusion")) {
+        return {
+          text: "Exclusion scope is not established by a returned Boolean alone. Official aggregate budget descriptions conflict; verify the selected cost center and applicable enterprise scope before drawing a blocking conclusion.",
+          url: `${budgetsUrl}#cost-center-exclusion`
+        };
+      }
+      if (normalized.includes("alerts") || normalized.includes("recipients")) {
+        return {
+          text: "Supported spending budgets can notify at 75, 90, and 100 percent. An empty additional recipient list does not prove missing delivery: confirm default owners and billing managers.",
+          url: `${setupUrl}#creating-a-budget`
+        };
+      }
+      if (normalized.includes("team membership") || normalized.includes("inventory and reporting")) {
+        return {
+          text: "Direct or expanded user attribution makes cost center enforcement and reporting predictable.",
+          url: `${optimizeUrl}#choosing-a-scope`
+        };
+      }
+      if (normalized.includes("cost center spending")) {
+        return {
+          text: "A cost center budget caps that group’s paid usage after included credits are exhausted.",
+          url: `${budgetsUrl}#cost-center-budget`
+        };
+      }
+      if (normalized.includes("aggregate caps") || normalized.includes("metered gap")) {
+        return {
+          text: "Aggregate spending limits should cover the difference between maximum user allowances and the licence-funded pool.",
+          url: `${optimizeUrl}#sizing-your-budgets`
+        };
+      }
+      if (normalized.includes("universal limit")) {
+        return {
+          text: "The universal user budget is the default per-user limit and allows controlled sharing of the pooled credits.",
+          url: `${budgetsUrl}#user-level-budget`
+        };
+      }
+      if (normalized.includes("enterprise ai credits") || normalized.includes("enterprise copilot")) {
+        return {
+          text: "An enterprise AI credits budget caps paid AI credit usage after the shared included pool is exhausted.",
+          url: `${budgetsUrl}#enterprise-budget`
+        };
+      }
+      return {
+        text: "GitHub evaluates user limits first, then included credits, then the applicable metered spending budget.",
+        url: `${budgetsUrl}#how-billing-flows-through-budgets`
+      };
+    }
+
+    function rollbackGuidance(actionType, context = {}) {
+      const enterprise = context.enterprise
+        || window.CANVAS_CONFIG?.enterprise
+        || window.GITHUB_BILLING_SNAPSHOT?.enterprise
+        || "{enterprise}";
+      const resource = context.resource || "GitHub billing budget";
+      const resourceId = context.resourceId || "{budget_id}";
+      const priorValues = context.priorValues || "the prior resource configuration";
+      const collectionRoute = `/enterprises/${enterprise}/settings/billing/budgets`;
+      const itemRoute = `${collectionRoute}/${resourceId}`;
+      const interfaceRoute = `GitHub enterprise billing budgets interface and`;
+      const guidance = {
+        create: {
+          summary: `Delete the newly created ${resource} if validation shows it is incorrect.`,
+          dataRequired: `Created resource ID, creation response, scope, SKU, amount, stop usage setting, and alert recipients.`,
+          route: `${interfaceRoute} DELETE ${itemRoute}`
+        },
+        update: {
+          summary: `Restore the previous ${resource} values if the change produces an unintended result.`,
+          dataRequired: `Resource ID and previous ${priorValues}.`,
+          route: `${interfaceRoute} PATCH ${itemRoute}`
+        },
+        delete: {
+          summary: `Recreate the deleted ${resource} with its previous configuration.`,
+          dataRequired: `Full exported configuration, resource ID, scope, SKU, amount, stop usage setting, and alert recipients.`,
+          route: `${interfaceRoute} POST ${collectionRoute}`
+        },
+        "read-only": {
+          summary: "No rollback required. This action only reads or verifies current GitHub settings.",
+          dataRequired: "None.",
+          route: `${interfaceRoute} GET ${collectionRoute}`
+        },
+        blocked: {
+          summary: "No rollback required. Validation blocked the action before mutation.",
+          dataRequired: "None.",
+          route: `${interfaceRoute} ${collectionRoute}`
+        },
+        waived: {
+          summary: "No rollback required. A waiver records a decision and does not mutate GitHub.",
+          dataRequired: "None.",
+          route: `${interfaceRoute} ${collectionRoute}`
+        },
+        unknown: {
+          summary: `Define and approve rollback for the ${resource} during preflight before any mutation.`,
+          dataRequired: `Resource ID, a current configuration export, and all fields that the action may change.`,
+          route: `${interfaceRoute} ${collectionRoute}`
+        }
+      };
+      return guidance[actionType] || guidance.unknown;
+    }
+
+    function renderMoscow(title, className, items, mustItems = []) {
+      const actionable = className === "must" || className === "should";
+      const orderedItems = actionable
+        ? [...items].sort((left, right) => left.priorityScore - right.priorityScore)
+        : items;
+      return `
+        <article class="card moscow ${className}">
+          <h3>${title}</h3>
+          <ol class="${actionable ? "action-list" : ""}">
+            ${orderedItems.map((item, index) => {
+              if (!actionable) return `<li data-recommendation-id="${actionId(className, item)}">${escapeHtml(item.action)}</li>`;
+              const id = actionId(className, item);
+              const { completed, blocked, waived, unverified, pending } = resolveActionState(className, item, id);
+              const operation = operationForAction(id);
+              const capability = actionCapabilityReady(item.actionKind);
+              const recoveryBlocked = item.actionKind !== "read-only" && hasAmbiguousMutation();
+              const pendingBlocked = item.actionKind !== "read-only" && hasPendingMutation();
+              const refreshRequired = ["queued", "required"].includes(completedActionDetails.get(id)?.refreshStatus);
+              const liveInventory = hasLiveInventory();
+              const uiVerificationBlocked = item.requiresUiVerification && !uiVerificationState.isUsable;
+              const activeMustIds = new Set(mustItems.map((mustItem) => actionId("must", mustItem)));
+              const activeMustDependencies = (item.dependsOnMust || [])
+                .filter((dependencyId) => activeMustIds.has(dependencyId));
+              const dependencyReason = className === "should"
+                ? shouldDependencyReason(item, mustItems)
+                : "";
+              const disabled = completed || Boolean(blocked) || Boolean(waived) || Boolean(dependencyReason)
+                || unverified || pending || recoveryBlocked || pendingBlocked || actionInProgress || actionStateStatus !== "ready"
+                || !liveInventory || !capability || uiVerificationBlocked;
+              const buttonLabel = unverified || recoveryBlocked
+                ? "Recovery required"
+                : pending || pendingBlocked
+                ? "Operation in progress"
+                : actionStateStatus !== "ready"
+                ? "Saved state unavailable"
+                : completed
+                ? refreshRequired ? "Refresh required" : "Completed"
+                : blocked
+                  ? "Blocked"
+                  : waived
+                    ? "Waived"
+                    : dependencyReason
+                      ? "Resolve Must first"
+                  : uiVerificationBlocked
+                    ? "Revalidate UI fact"
+                    : liveInventory
+                    ? capability
+                      ? operation?.status === "prepared" ? "Review and proceed" : "Prepare action"
+                      : prerequisitesChecked
+                        ? "Permission not verified"
+                        : "Check prerequisites"
+                    : "Inventory required";
+              const help = actionHelp(item.action);
+              const rollback = rollbackGuidance(item.actionType, {
+                enterprise: window.CANVAS_CONFIG?.enterprise || window.GITHUB_BILLING_SNAPSHOT?.enterprise,
+                resource: item.rollbackResource,
+                priorValues: item.rollbackData
+              });
+              return `
+                <li class="action-item ${completed ? "completed" : ""} ${unverified ? "unverified" : ""} ${refreshRequired ? "refresh-required" : ""} ${blocked ? "blocked" : ""} ${waived ? "waived" : ""}" data-action-id="${id}">
+                  <span class="action-rank" aria-label="Priority ${index + 1}">${index + 1}</span>
+                  ${unverified || pending ? '<span aria-label="Not completed">?</span>' : `<input type="checkbox" ${completed ? "checked" : ""} disabled aria-label="Action completed">`}
+                  <span class="action-copy">
+                    <span class="action-field">
+                      <span class="action-label">Risk</span>
+                      <span>${escapeHtml(item.risk)}</span>
+                    </span>
+                    <span class="action-field">
+                      <span class="action-label">Action</span>
+                      <span class="action-text">${escapeHtml(item.action)}</span>
+                    </span>
+                    <span class="action-field rollback-guidance">
+                      <span class="action-label">Rollback</span>
+                      <span>${escapeHtml(rollback.summary)}</span>
+                      <span class="muted">Data needed: ${escapeHtml(rollback.dataRequired)}</span>
+                      <span class="muted">GitHub interface or API route: ${escapeHtml(rollback.route)}</span>
+                    </span>
+                    <span class="validation-note">${uiVerificationBlocked ? "Revalidate the GitHub UI fact before execution." : liveInventory ? capability ? "Preparation checks the current server policy. Required approval is requested by the host." : "Verify the required read or write permission in Readiness." : "Refresh inventory before execution."}</span>
+                    <span class="dependency-reason" id="dependency-${id}" role="status">${escapeHtml(dependencyReason)}</span>
+                  </span>
+                  <span class="action-controls">
+                    <button class="proceed-button ${completed || blocked || waived ? "secondary" : ""}" type="button"
+                      data-action-id="${id}" data-category="${className}" data-risk="${encodeURIComponent(item.risk)}"
+                      data-action="${encodeURIComponent(item.action)}"
+                      data-action-type="${escapeHtml(item.actionType)}"
+                      data-rollback="${encodeURIComponent(JSON.stringify(rollback))}"
+                      data-action-kind="${item.actionKind}"
+                      data-must-dependencies="${encodeURIComponent(JSON.stringify(activeMustDependencies))}"
+                      data-requires-ui-verification="${item.requiresUiVerification}"
+                      aria-describedby="dependency-${id}"
+                      ${disabled ? "disabled" : ""}>${buttonLabel}</button>
+                    ${className === "must" ? `<button class="secondary waive-button" type="button"
+                      data-action-id="${id}" data-risk="${encodeURIComponent(item.risk)}"
+                      data-action="${encodeURIComponent(item.action)}"
+                      ${completed || blocked || waived || unverified || pending || recoveryBlocked || pendingBlocked || actionInProgress || actionStateStatus !== "ready" || !liveInventory ? "disabled" : ""}>Waive</button>` : ""}
+                    <button class="secondary explain-button" type="button" aria-expanded="false"
+                      aria-controls="help-${id}" data-help-id="help-${id}" data-action-id="${id}">What's this?</button>
+                  </span>
+                  <span class="action-result" role="status">${unverified ? "Outcome unverified. Use the explicit reconcile control below; do not resend this action." : pending ? "Operation queued or running. Select Refresh saved state to check its outcome. Do not resend." : refreshRequired ? escapeHtml(safeMessage(completedActionDetails.get(id)?.refreshMessage || "Refresh required before dependent actions can proceed.")) : blocked ? escapeHtml(blocked) : waived ? `Waived, not completed: ${escapeHtml(safeMessage(waived.reason))}` : ""}</span>
+                  <span class="action-help" id="help-${id}" hidden>
+                    ${escapeHtml(help.text)} <a href="${escapeHtml(help.url)}" target="_blank" rel="noreferrer">GitHub Docs</a>
+                  </span>
+                </li>
+              `;
+            }).join("")}
+          </ol>
+        </article>
+      `;
+    }
+
+    function runAssessment() {
+      const restoreFocus = captureFocus();
+      const expanded = [...document.querySelectorAll(".explain-button")]
+        .filter((button) => button.getAttribute("aria-expanded") === "true").map((button) => button.dataset.helpId);
+      syncUsersFromTable();
+      updateInventoryFreshnessStatus();
+      if (!hasLiveInventory()) {
+        currentRecommendations = { must: [], should: [], could: [], notNow: [] };
+        byId("assessment-output").innerHTML = `
+          <article class="card">
+            <h3>Inventory required</h3>
+            <p>No tenant data is bundled with this canvas. Run Inventory for the active enterprise before using recommendations or write actions.</p>
+            <p>Recommendation execution controls remain disabled until a live API snapshot matches the active enterprise and prerequisites pass. Read only inventory and chat requests remain available.</p>
+          </article>
+        `;
+        byId("assessment-refresh-status").textContent = "Inventory must be run before assessment or execution.";
+        restoreFocus();
+        return;
+      }
+
+      const settings = readSettings();
+      const snapshot = window.GITHUB_BILLING_SNAPSHOT;
+      const finOps = window.FINOPS_METRICS.deriveFinOpsMetrics(snapshot || {});
+      let assessment;
+      let scenario;
+      try {
+        scenario = window.CANVAS_ASSESSMENT_POLICY.snapshotScenario(snapshot, scenarioSelection(settings), window.CANVAS_UI_VERIFICATIONS);
+        assessment = window.CANVAS_ASSESSMENT_POLICY.buildAssessment(snapshot, scenario);
+      } catch (error) {
+        currentRecommendations = { must: [], should: [], could: [], notNow: [] };
+        byId("assessment-output").innerHTML = `<article class="card"><h3>Scenario selection unavailable</h3><p role="status">${escapeHtml(safeMessage(error.message))} Choose an inventoried cost center before preparing an action.</p></article>`;
+        restoreFocus();
+        return;
+      }
+      const { must, should, could, notNow } = assessment;
+      currentRecommendations = { must, should, could, notNow };
+
+      byId("assessment-output").innerHTML = `
+        <article class="card">
+          <h3>Current evidence</h3>
+          <p>Scenario assumptions: paid usage ${settings.paidUsage === null ? "unknown" : settings.paidUsage ? "enabled" : "disabled"}; objective ${escapeHtml(settings.budgetObjective)}; selected cost center ${escapeHtml(settings.costCenter.name || "none selected")}. These are operator choices, not observed policies. Empty explicit alert recipients require a default owner delivery check, not an assertion that alerts are absent.</p>
+          <p>Assessment sources: <a href="https://docs.github.com/en/copilot/tutorials/budgets/optimizing-your-budget-configuration" target="_blank" rel="noreferrer">Optimizing your budget configuration</a> and <a href="https://docs.github.com/en/enterprise-cloud@latest/copilot/concepts/billing-and-usage/organizations-and-enterprises/budgets" target="_blank" rel="noreferrer">Budgets for usage based billing</a>.</p>
+          <div class="evidence-grid">
+            <div class="evidence"><span>Enterprise</span><strong>${escapeHtml(snapshot.enterprise)}</strong></div>
+            <div class="evidence"><span>Snapshot generated</span><strong>${escapeHtml(new Date(snapshot.generatedAt).toLocaleString())}</strong></div>
+            <div class="evidence"><span>Budgets</span><strong>${snapshot.budgets.length}</strong></div>
+            <div class="evidence"><span>Cost centers</span><strong>${snapshot.costCenters.length}</strong></div>
+            <div class="evidence"><span>Observed users</span><strong>${scenario.users.length}</strong></div>
+            <div class="evidence"><span>Enterprise licenses</span><strong>${metricText(finOps.licenseCount, (value) => value.toLocaleString())}</strong></div>
+            <div class="evidence"><span>Nominal licence-funded pool value, not remaining credits or invoice</span><strong>${metricText(finOps.poolValue, money)}</strong></div>
+            <div class="evidence"><span>Additional AI spend observed</span><strong>${metricText(finOps.additionalSpend, money)}</strong></div>
+            <div class="evidence"><span>Spend reporting period</span><strong>${escapeHtml(usageScopeText(finOps.additionalSpend?.period))}</strong></div>
+            <div class="evidence"><span>Spend report filters</span><strong>${escapeHtml(usageScopeText(finOps.additionalSpend?.filters))}</strong></div>
+            <div class="evidence"><span>Selected cost center</span><strong>${escapeHtml(settings.costCenter.name || "None")}</strong></div>
+            <div class="evidence"><span>Observed enterprise budget amount, not a verified cap</span><strong>${scenario.settings.enterpriseBudget === null ? "Unavailable or not observed" : money(scenario.settings.enterpriseBudget)}</strong></div>
+          </div>
+          <p class="muted">Snapshot freshness does not establish the current or complete billing period. The spend total applies only to its recorded period and filters.</p>
+          ${interpretationNote()}
+        </article>
+        <div class="moscow-grid">
+          ${renderMoscow("Must have", "must", must, must)}
+          ${renderMoscow("Should have", "should", should, must)}
+          ${renderMoscow("Could have", "could", could)}
+          ${renderMoscow("Won't do now", "notNow", notNow)}
+        </div>
+      `;
+      wireProceedButtons();
+      document.querySelectorAll(".explain-button").forEach((button) => {
+        if (!expanded.includes(button.dataset.helpId)) return;
+        button.setAttribute("aria-expanded", "true");
+        byId(button.dataset.helpId).hidden = false;
+        button.textContent = "Hide";
+      });
+      restoreFocus();
+    }
+
+    function wireProceedButtons() {
+      document.querySelectorAll(".proceed-button").forEach((button) => {
+        button.addEventListener("click", () => proceedAction(button));
+      });
+      document.querySelectorAll(".waive-button").forEach((button) => {
+        button.addEventListener("click", () => waiveMustAction(button));
+      });
+      document.querySelectorAll(".explain-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          const help = byId(button.dataset.helpId);
+          const expanded = button.getAttribute("aria-expanded") === "true";
+          button.setAttribute("aria-expanded", String(!expanded));
+          help.hidden = expanded;
+          button.textContent = expanded ? "What's this?" : "Hide";
+        });
+      });
+    }
+
+    async function proceedAction(button) {
+      if (actionInProgress || button.disabled || isStandalone() || actionStateStatus !== "ready") return;
+      const id = button.dataset.actionId;
+      const prepared = operationForAction(id);
+      const kind = prepared?.actionKind || button.dataset.actionKind;
+      if (actionUnverified(id) || actionPending(id)
+        || (kind !== "read-only" && (hasAmbiguousMutation() || hasPendingMutation())) || !actionCapabilityReady(kind)) return;
+      updateUiVerificationStatus();
+      if (button.dataset.requiresUiVerification === "true" && !uiVerificationState.isUsable) {
+        const item = button.closest(".action-item");
+        item.querySelector(".action-result").textContent = "Revalidate the GitHub UI fact before execution.";
+        button.disabled = true;
+        button.textContent = "Revalidate UI fact";
+        return;
+      }
+      actionInProgress = true;
+      setProceedButtonsLocked(true);
+      const item = button.closest(".action-item");
+      const result = item.querySelector(".action-result");
+      const dispatch = prepared?.status === "prepared";
+      button.disabled = true;
+      button.classList.add("loading");
+      button.textContent = dispatch ? "Awaiting host result" : "Preparing";
+      result.textContent = dispatch ? "The host will request any required approval. No completion is assumed." : "Checking the action and preparing its exact target and change.";
+      try {
+        const settings = readSettings();
+        const response = await fetch(dispatch ? "/api/proceed" : "/api/prepare", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dispatch
+            ? { operationId: prepared.operationId, expectedRevision: stateRevision }
+            : { actionId: id, scenario: scenarioSelection(settings) })
+        });
+        const payload = await response.json();
+        const message = safeMessage(payload.message || payload.error || `Request returned ${payload.status || response.status}.`);
+        if (!response.ok || !payload.ok) throw new Error(message);
+        if (!dispatch && payload.status === "prepared") {
+          const operation = payload.operation;
+          if (!operation?.operationId || operation.actionId !== id || operation.status !== "prepared"
+            || operation.enterprise !== window.CANVAS_CONFIG?.enterprise || !Number.isInteger(payload.stateRevision) || payload.stateRevision < 0
+            || typeof operation.actor !== "string" || !operation.actor
+            || !operation.target || typeof operation.target !== "object"
+            || !["read-only", "write"].includes(operation.actionKind)) {
+            throw new Error("Preparation returned an invalid operation or revision.");
+          }
+          operations.set(operation.operationId, operation);
+          stateRevision = payload.stateRevision;
+        }
+        if (dispatch) {
+          const pending = operationPending(payload);
+          if (pending && payload.operationId !== prepared.operationId) {
+            throw new Error("The queued operation identity does not match the prepared operation.");
+          }
+          uncertainRequests.set(id, { ...prepared, status: pending ? payload.status : "unverified", uncertain: !pending });
+          await loadCompletedActions();
+        } else if (payload.status !== "prepared") {
+          await loadCompletedActions();
+        }
+        byId("assessment-refresh-status").textContent = !dispatch && payload.status === "prepared"
+          ? "Prepared only. Review the exact change below, then select Review and proceed. No mutation has been sent."
+          : dispatch && actionUnverified(id)
+            ? "Outcome unverified in saved state. Do not resend; use explicit reconciliation."
+            : dispatch && actionPending(id)
+            ? "Operation queued or running. Select Refresh saved state to check its outcome. Do not resend."
+            : dispatch
+            ? `Saved result: ${operationForAction(id)?.status || "unavailable"}. Review the saved evidence.`
+            : `${payload.status || "Result pending"}: ${message}`;
+      } catch (error) {
+        if (dispatch) {
+          uncertainRequests.set(id, { ...prepared, status: "interrupted", uncertain: true, message: safeMessage(error.message) });
+          await loadCompletedActions();
+        }
+        const outcome = dispatch
+          ? actionUnverified(id) ? "Outcome unverified. Do not resend; reconcile the operation." : `Saved result: ${operationForAction(id)?.status || "unavailable"}. Review the saved evidence.`
+          : "Preparation failed. No mutation was requested.";
+        byId("assessment-refresh-status").textContent = `${outcome} ${safeMessage(error.message)}`;
+      } finally {
+        actionInProgress = false;
+        runAssessment();
+        renderOperationStates();
+        renderCompletedActions();
+      }
+    }
+
+    async function waiveMustAction(button) {
+      if (actionInProgress || button.disabled || isStandalone() || actionStateStatus !== "ready"
+        || actionUnverified(button.dataset.actionId) || actionPending(button.dataset.actionId)
+        || hasAmbiguousMutation() || hasPendingMutation()) return;
+      const reason = window.prompt("Reason for waiving this Must action:");
+      if (reason === null) return;
+      const normalizedReason = reason.trim();
+      const item = button.closest(".action-item");
+      const result = item.querySelector(".action-result");
+      if (normalizedReason.length < 10) {
+        result.textContent = "Enter a clear waiver reason of at least 10 characters.";
+        return;
+      }
+      actionInProgress = true;
+      setProceedButtonsLocked(true);
+      button.disabled = true;
+      button.classList.add("loading");
+      button.textContent = "Waiving";
+      try {
+        const response = await fetch("/api/waive", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: button.dataset.actionId,
+            expectedRevision: stateRevision,
+            reason: normalizedReason
+          })
+        });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) {
+          throw new Error(payload.error || `Request failed with HTTP ${response.status}.`);
+        }
+        await loadCompletedActions();
+        byId("assessment-refresh-status").textContent = "Waiver recorded separately from completion.";
+      } catch (error) {
+        button.disabled = false;
+        button.classList.remove("loading");
+        button.textContent = "Waive";
+        result.textContent = `Waiver not confirmed: ${safeMessage(error.message)} Refresh saved state before trying again.`;
+        actionStateStatus = "failed";
+        actionStateMessage = result.textContent;
+      } finally {
+        actionInProgress = false;
+        runAssessment();
+        renderOperationStates();
+        renderCompletedActions();
+      }
+    }
+
+    function setProceedButtonsLocked(locked) {
+      document.querySelectorAll(".proceed-button, .waive-button").forEach((candidate) => {
+        if (locked) {
+          candidate.disabled = true;
+          return;
+        }
+        const id = candidate.dataset.actionId;
+        if (candidate.classList.contains("waive-button")) {
+          candidate.disabled = completedActions.has(id)
+            || blockedActions.has(id)
+            || waivedActions.has(id)
+            || actionUnverified(id) || actionPending(id) || hasAmbiguousMutation() || hasPendingMutation() || actionStateStatus !== "ready"
+            || !hasLiveInventory();
+          return;
+        }
+        const dependencies = JSON.parse(decodeURIComponent(candidate.dataset.mustDependencies || "%5B%5D"));
+        candidate.disabled = completedActions.has(id)
+          || blockedActions.has(id)
+          || waivedActions.has(id)
+          || actionUnverified(id) || actionPending(id) || actionStateStatus !== "ready"
+          || (candidate.dataset.actionKind !== "read-only" && (hasAmbiguousMutation() || hasPendingMutation()))
+          || dependencies.some((dependencyId) => !isMustResolved(dependencyId))
+          || !hasLiveInventory()
+          || !actionCapabilityReady(candidate.dataset.actionKind)
+          || (candidate.dataset.requiresUiVerification === "true" && !uiVerificationState.isUsable);
+      });
+    }
+
+    function applyActionState(payload) {
+      const record = (value) => value && typeof value === "object" && !Array.isArray(value);
+      if (!record(payload) || payload.ok === false || !Number.isInteger(payload.revision) || payload.revision < 0
+        || !["completed", "blocked", "waived", "operations", "unverified"].every((key) => record(payload[key]))
+        || !["completed", "blocked", "waived", "operations", "unverified"].every((key) => Object.values(payload[key]).every(record))
+        || !Object.entries(payload.operations).every(([id, operation]) => typeof operation.operationId === "string" && operation.operationId
+          && id === operation.operationId && operation.enterprise === (payload.enterprise || window.CANVAS_CONFIG?.enterprise)
+          && typeof operation.actionId === "string" && typeof operation.status === "string")
+        || !Array.isArray(payload.history) || !payload.history.every(record)) {
+        throw new Error("Corrupt or unsupported saved action state. Existing history has been retained.");
+      }
+      if (payload.enterprise && payload.enterprise !== window.CANVAS_CONFIG?.enterprise) {
+        throw new Error("Saved state target does not match the active enterprise.");
+      }
+      if (stateRevision !== null && payload.revision < stateRevision) {
+        throw new Error("Saved state is older than the displayed revision. Refresh saved state.");
+      }
+      completedActions.clear();
+      completedActionDetails.clear();
+      blockedActions.clear();
+      blockedActionDetails.clear();
+      waivedActions.clear();
+      operations.clear();
+      unverifiedActions.clear();
+      actionHistory.length = 0;
+      for (const [id, value] of Object.entries(payload.operations)) operations.set(id, value);
+      for (const [id, value] of Object.entries(payload.unverified)) unverifiedActions.set(id, value);
+      for (const [id, request] of uncertainRequests) {
+        const operation = operations.get(request.operationId);
+        const unverified = unverifiedActions.has(id) || [...unverifiedActions.values()].some((entry) =>
+          entry.actionId === id || entry.operationId === request.operationId);
+        if (unverified || operation && operation.status !== "prepared"
+          && (operation.status !== "completed" || payload.completed[id])) uncertainRequests.delete(id);
+      }
+      for (const [id, value] of Object.entries(payload.completed)) {
+        completedActions.add(id);
+        completedActionDetails.set(id, value);
+      }
+      for (const id of completedActions) {
+        if (actionUnverified(id) || actionPending(id)) {
+          completedActions.delete(id);
+          completedActionDetails.delete(id);
+        }
+      }
+      for (const [id, value] of Object.entries(payload.blocked || {})) {
+        blockedActions.set(id, safeMessage(value.message || String(value)));
+        blockedActionDetails.set(id, value);
+      }
+      for (const [id, value] of Object.entries(payload.waived || {})) {
+        waivedActions.set(id, value);
+      }
+      actionHistory.push(...(payload.history || []));
+      stateRevision = payload.revision;
+      actionStateStatus = "ready";
+      actionStateMessage = `Saved state loaded at revision ${stateRevision}.`;
+      if (Object.prototype.hasOwnProperty.call(payload, "snapshot")) {
+        applySnapshotPreservingDrafts(payload.snapshot);
+      }
+    }
+
+    async function loadCompletedActions() {
+      const restoreFocus = captureFocus();
+      if (isStandalone()) {
+        actionStateStatus = "standalone";
+        actionStateMessage = "Standalone file mode. Manual calculations work; live inventory and saved actions require the extension.";
+        renderOperationStates();
+        return;
+      }
+      actionStateStatus = "loading";
+      actionStateMessage = "Loading saved state. Existing history is retained until the read succeeds.";
+      renderOperationStates();
+      setProceedButtonsLocked(true);
+      try {
+        const response = await fetch("/api/action-state", { cache: "no-store" });
+        const payload = await response.json();
+        if (!response.ok || payload.ok === false) {
+          throw new Error(`${payload.errorCode || `HTTP ${response.status}`}: ${safeMessage(payload.message || payload.error || "Saved state read failed.")}`);
+        }
+        applyActionState(payload);
+        if (["queued", "required"].includes(payload.refresh?.status)) {
+          byId("readiness-status").textContent = `Refresh required. ${safeMessage(payload.refresh.message || "Dependent execution remains locked until a newer inventory is verified.")}`;
+        }
+        const savedOperations = displayedOperations();
+        if (savedOperations.length) {
+          byId("assessment-refresh-status").textContent = savedOperations.some((operation) => actionUnverified(operation.actionId))
+            ? "Saved state refreshed. Unverified outcomes require explicit reconciliation; do not resend."
+            : savedOperations.some(operationPending)
+              ? "Operation queued or running. Select Refresh saved state to check its outcome. Do not resend."
+              : "Saved state refreshed. Review the operation outcomes below.";
+        }
+      } catch (error) {
+        actionStateStatus = /denied|403|401|eacces/i.test(error.message) ? "denied"
+          : /corrupt|unsupported|json|syntax|invalid/i.test(error.message) ? "corrupt" : "failed";
+        actionStateMessage = `${actionStateStatus}: ${safeMessage(error.message)} Saved actions are unavailable. Existing history is retained. Restore access or recover the state file, then select Refresh saved state. Do not resend an uncertain mutation.`;
+        applySnapshotPreservingDrafts(null);
+      } finally {
+        renderOperationStates();
+        runAssessment();
+        renderCompletedActions();
+        setProceedButtonsLocked(actionInProgress);
+        renderReadRequestStatuses();
+        restoreFocus();
+      }
+    }
+
+    function unverifiedOperation(stateKey, entry) {
+      return {
+        ...entry,
+        stateKey,
+        actionId: entry.actionId || operations.get(entry.operationId)?.actionId
+          || (entry.migrationReason === "legacy-completion-unverified" ? stateKey : undefined),
+        status: entry.status || "unverified"
+      };
+    }
+
+    function displayedOperations() {
+      const entries = new Map(operations);
+      for (const [id, entry] of unverifiedActions) entries.set(entry.operationId || id, unverifiedOperation(id, entry));
+      for (const [id, entry] of uncertainRequests) entries.set(entry.operationId || id, entry);
+      return [...entries.values()];
+    }
+
+    function operationNeedsRefresh(operation) {
+      const completion = completedActionDetails.get(operation.actionId);
+      return completedActions.has(operation.actionId) && completion?.operationId === operation.operationId
+        && ["queued", "required"].includes(completion?.refreshStatus);
+    }
+
+    function renderOperationStates() {
+      const restoreFocus = captureFocus();
+      byId("action-state-status").textContent = actionStateMessage;
+      byId("reload-action-state").disabled = isStandalone() || actionInProgress || actionStateStatus === "loading";
+      for (const id of ["inventory", "ai-assessment", "check-prerequisites"]) {
+        if (isStandalone()) byId(id).disabled = true;
+      }
+      const entries = displayedOperations();
+      byId("operations-section").hidden = entries.length === 0;
+      byId("operations-list").innerHTML = entries.map((operation) => {
+        const status = operation.status === "completed" && !completedActions.has(operation.actionId) ? "unverified" : operation.status || "unverified";
+        const recovery = operationNeedsRecovery(operation) || status === "unverified";
+        const refreshRequired = operationNeedsRefresh(operation);
+        const preview = sanitizeDisplayValue({
+          requestedChange: operation.requestedChange,
+          beforeValues: operation.beforeValues,
+          postconditions: operation.postconditions
+        });
+        return `<div class="operation-record">
+          <p><strong>${escapeHtml(safeMessage(operation.actionId || operation.stateKey || "Unknown action"))}</strong></p>
+          <p role="status">${escapeHtml(status)}${status === "completed" ? ". See saved completion and verification evidence." : ". Not completed."}</p>
+          <p>Actor: ${escapeHtml(safeMessage(operation.actor || "Unknown"))}. Target: ${escapeHtml(safeMessage(operation.target || operation.enterprise || "Unknown"))}.</p>
+          <p class="muted">Operation: ${escapeHtml(safeMessage(operation.operationId || "Unavailable"))}. ${escapeHtml(safeMessage(operation.message || ""))}</p>
+          ${status === "prepared" ? `<pre class="operation-preview">${escapeHtml(JSON.stringify(preview, null, 2))}</pre>` : ""}
+          ${operationPending(operation) ? "<p>The operation is still in progress. Select Refresh saved state to check its outcome. Do not resend.</p>" : ""}
+          ${recovery || refreshRequired ? `<p>${refreshRequired ? "Run read-only Inventory, then verify this operation against the refreshed snapshot." : "Recovery required. Do not repeat this mutation or assume it failed."}</p>${operation.operationId ? `<button class="secondary reconcile-button" type="button" data-operation-id="${escapeHtml(operation.operationId)}" ${isStandalone() || actionInProgress ? "disabled" : ""}>${refreshRequired ? "Verify refreshed inventory" : "Reconcile saved operation"}</button>` : "<p>No operation ID was recorded. Review the retained evidence with the host; this entry cannot be reconciled automatically.</p>"}` : ""}
+        </div>`;
+      }).join("");
+      document.querySelectorAll(".reconcile-button").forEach((button) => {
+        button.addEventListener("click", () => reconcileOperation(button.dataset.operationId));
+      });
+      restoreFocus();
+    }
+
+    async function reconcileOperation(operationId) {
+      if (typeof operationId !== "string" || !operationId || isStandalone() || actionInProgress
+        || !displayedOperations().some((operation) => operation.operationId === operationId
+        && (operationNeedsRecovery(operation) || actionUnverified(operation.actionId) || operationNeedsRefresh(operation)))) return;
+      actionInProgress = true;
+      setProceedButtonsLocked(true);
+      renderOperationStates();
+      byId("assessment-refresh-status").textContent = "Reading evidence for this saved operation. No mutation will be resent.";
+      try {
+        const response = await fetch("/api/reconcile", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ operationId })
+        });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) throw new Error(payload.message || payload.error || `HTTP ${response.status}`);
+        await loadCompletedActions();
+        byId("assessment-refresh-status").textContent = safeMessage(payload.message || "Reconciliation checked. Review saved state; completion is not assumed.");
+      } catch (error) {
+        byId("assessment-refresh-status").textContent = `Reconciliation failed: ${safeMessage(error.message)} Outcome remains unverified. No mutation was resent.`;
+      } finally {
+        actionInProgress = false;
+        renderOperationStates();
+        runAssessment();
+      }
+    }
+
+    function renderCompletedActions() {
+      const section = byId("completed-actions-section");
+      const list = byId("completed-actions-list");
+      const entries = displayedHistory().reverse();
+      section.hidden = entries.length === 0;
+      list.innerHTML = entries.map((item) => `
+        <div class="completed-record" data-completed-id="${escapeHtml(item.id)}">
+          <div>
+            <p><strong>${escapeHtml(item.action || "Saved action")}</strong></p>
+            <p role="status">${escapeHtml(item.type || "unverified")}${item.type === "completed" ? "" : ", not completed"}</p>
+            <p class="muted">${escapeHtml(String(item.message || (item.type === "waived" ? `Waived, not completed: ${item.reason}` : "See saved evidence and operation status.")).split(/\r?\n/, 1)[0])}</p>
+            ${renderAuditSummary(item)}
+            ${item.rollback ? `
+              <p class="muted"><strong>Rollback:</strong> ${escapeHtml(item.rollback.summary)}</p>
+              <p class="muted"><strong>Data needed:</strong> ${escapeHtml(item.rollback.dataRequired)}</p>
+              <p class="muted"><strong>Route:</strong> ${escapeHtml(item.rollback.route)}</p>
+            ` : ""}
+            ${["queued", "required"].includes(item.refreshStatus) ? `<p class="muted"><strong>Refresh required.</strong> ${escapeHtml(item.refreshMessage || "Dependent execution remains locked.")}</p>` : ""}
+          </div>
+          ${safeResultUrl(item.resultUrl) ? `<a class="result-link" href="${escapeHtml(safeResultUrl(item.resultUrl))}" target="_blank" rel="noreferrer">View in GitHub</a>` : ""}
+          ${renderAuditDetails(item)}
+        </div>
+      `).join("");
+    }
+
+    function renderAuditSummary(item) {
+      const audit = item.audit;
+      if (!audit) {
+        return '<p class="audit-summary"><span class="audit-status incomplete">Audit incomplete</span> · Audit details unavailable for this legacy record.</p>';
+      }
+      const status = audit.complete ? "Audit complete" : "Audit incomplete";
+      const path = audit.executionPath ? String(audit.executionPath).toUpperCase() : "Unknown path";
+      const actor = audit.actor ? ` by ${audit.actor}` : "";
+      const timestamp = audit.timestamp ? ` · ${audit.timestamp}` : "";
+      return `<p class="audit-summary"><span class="audit-status${audit.complete ? "" : " incomplete"}">${escapeHtml(status)}</span> · ${escapeHtml(path + actor + timestamp)}</p>`;
+    }
+
+    function renderAuditDetails(item) {
+      const audit = item.audit;
+      if (!audit) return "";
+      const rows = [
+        ["Action code", audit.actionCode],
+        ["Enterprise", audit.enterprise],
+        ["Actor", audit.actor],
+        ["Requested change", audit.requestedChange],
+        ["Before values", audit.beforeValues],
+        ["After values", audit.afterValues],
+        ["Execution path", audit.executionPath],
+        ["Endpoint or interface URL", audit.endpointOrInterfaceUrl],
+        ["Approval evidence", audit.approvalEvidence],
+        ["Verification evidence", audit.verificationEvidence],
+        ["Result", audit.result],
+        ["Timestamp", audit.timestamp],
+        ["Result URL", audit.resultUrl],
+        ["Missing fields", audit.missingFields]
+      ];
+      return `<details class="audit-details">
+        <summary>Audit details</summary>
+        <dl class="audit-grid">${rows.map(([label, value]) => `
+          <dt>${escapeHtml(label)}</dt>
+          <dd>${escapeHtml(formatAuditValue(value))}</dd>
+        `).join("")}</dl>
+      </details>`;
+    }
+
+    function formatAuditValue(value) {
+      if (value === null || value === undefined || value === "") return "Not recorded";
+      if (typeof value === "object") return JSON.stringify(value, null, 2);
+      return String(value);
+    }
+
+    const sensitiveKey = /token|secret|password|authorization|cookie|credential|raw.?auth|auth.?output|environment/i;
+
+    function credentialSourceLabel(source) {
+      const labels = {
+        gh: "GitHub CLI", "gh-cli": "GitHub CLI", "gh-auth": "GitHub CLI",
+        environment: "Granted environment", GH_TOKEN: "GH_TOKEN", GITHUB_TOKEN: "GITHUB_TOKEN",
+        "environment:GH_TOKEN": "GH_TOKEN", "environment:GITHUB_TOKEN": "GITHUB_TOKEN",
+        "browser-session": "Browser session", "Browser session": "Browser session", manual: "Manual", Manual: "Manual",
+        "GitHub CLI": "GitHub CLI", "Granted environment": "Granted environment",
+        none: "Unavailable", unavailable: "Unavailable", Unavailable: "Unavailable"
+      };
+      return typeof source === "string" ? labels[source] || "Unknown" : "Unknown";
+    }
+
+    function safeMessage(value) {
+      const safe = sanitizeDisplayValue(value);
+      return typeof safe === "string" ? safe : safe == null ? "" : JSON.stringify(safe);
+    }
+
+    function safeResultUrl(value) {
+      return typeof value === "string" && /^https:\/\/(?:github\.com|docs\.github\.com)\/[^\s]*$/i.test(value) ? value : null;
+    }
+
+    function auditRedactedFields(audit) {
+      return new Set([
+        ...(Array.isArray(audit?.redactedFields) ? audit.redactedFields : []),
+        ...(Array.isArray(audit?.redactions) ? audit.redactions : []),
+        ...(Array.isArray(audit?.redaction?.fields) ? audit.redaction.fields : [])
+      ].map((field) => String(field).toLowerCase()));
+    }
+
+    function sanitizeDisplayValue(value, redacted = new Set(), path = "") {
+      if (Array.isArray(value)) {
+        return value.map((item, index) => sanitizeDisplayValue(item, redacted, `${path}[${index}]`));
+      }
+      if (typeof value === "string") {
+        return value
+          .replace(/\b(?:github_pat_|gh[pousr]_)[A-Za-z0-9_]+\b/g, "[REDACTED]")
+          .replace(/\bBearer\s+[A-Za-z0-9._~+/-]+=*\b/gi, "[REDACTED]")
+          .replace(/\b(token|secret|password|authorization|cookie|credential)\s*[:=]\s*[^\s,;]+/gi, "$1=[REDACTED]");
+      }
+      if (!value || typeof value !== "object") return value;
+      const output = {};
+      for (const [key, entryValue] of Object.entries(value)) {
+        const entryPath = path ? `${path}.${key}` : key;
+        if (key === "credentialSource" && !redacted.has(key.toLowerCase()) && !redacted.has(entryPath.toLowerCase())) {
+          output[key] = credentialSourceLabel(entryValue);
+          continue;
+        }
+        if (sensitiveKey.test(key)
+          || ["redactedfields", "redactions", "redaction"].includes(key.toLowerCase())
+          || redacted.has(key.toLowerCase())
+          || redacted.has(entryPath.toLowerCase())) continue;
+        output[key] = sanitizeDisplayValue(entryValue, redacted, entryPath);
+      }
+      return output;
+    }
+
+    function displayedHistory() {
+      const history = [...completedActionDetails.entries()]
+        .filter(([id]) => !actionHistory.some((entry) => entry.type === "completed" && entry.id === id))
+        .map(([id, item]) => ({ id, type: "completed", ...item }))
+        .concat(actionHistory);
+      for (const [type, entries] of [["blocked", blockedActionDetails], ["waived", waivedActions]]) {
+        for (const [id, item] of entries) {
+          if (!history.some((entry) => entry.id === id && entry.type === type)) history.push({ ...item, id, type });
+        }
+      }
+      for (const operation of displayedOperations()) {
+        const type = operation.status || "unverified";
+        const id = operation.actionId || operation.operationId || operation.stateKey;
+        if (!history.some((entry) => entry.type === type
+          && (operation.operationId && entry.operationId === operation.operationId || entry.id === id))) {
+          history.push({ ...operation, id, type });
+        }
+      }
+      return history
+        .sort((left, right) => String(left.updatedAt || "").localeCompare(String(right.updatedAt || "")))
+        .map((item) => {
+          const redacted = auditRedactedFields(item.audit);
+          const safeAudit = item.audit ? sanitizeDisplayValue(item.audit, redacted) : null;
+          return sanitizeDisplayValue({
+            id: item.id,
+            operationId: item.operationId || null,
+            type: item.type === "completed" && (!completedActions.has(item.id) || actionUnverified(item.id)) ? "unverified" : item.type || "unverified",
+            action: item.action || null,
+            reason: item.reason || null,
+            message: item.message || null,
+            updatedAt: item.updatedAt || null,
+            resultUrl: safeResultUrl(item.resultUrl || safeAudit?.resultUrl),
+            refreshStatus: item.refreshStatus || "not-required",
+            refreshMessage: item.refreshMessage || null,
+            rollback: item.rollback || null,
+            verification: item.verification || null,
+            audit: safeAudit
+          }, redacted);
+        });
+    }
+
+    function usageScopeText(value) {
+      return value === null || value === undefined ? "Unavailable, not recorded" : safeMessage(value);
+    }
+
+    async function callLocalService(path, button, busyText) {
+      if (isStandalone()) throw new Error("This action requires the extension; this is a standalone file.");
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.classList.add("loading");
+      button.textContent = busyText;
+      try {
+        const response = await fetch(path, { method: "POST" });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) {
+          throw new Error(safeMessage(payload.error || `Request failed with HTTP ${response.status}.`));
+        }
+        return payload;
+      } finally {
+        button.disabled = false;
+        button.classList.remove("loading");
+        button.textContent = originalText;
+      }
+    }
+
+    const readinessStatusPresentation = Object.freeze({
+      ready: { label: "ready", description: "Ready" },
+      warning: { label: "warning", description: "Warning, not ready" },
+      optional: { label: "optional", description: "Optional, unavailable" },
+      blocked: { label: "blocked", description: "Blocked, not ready" },
+      not_applicable: { label: "not applicable", description: "Not applicable, unavailable" }
+    });
+
+    function renderReadinessStatus(status) {
+      status = typeof status === "string" ? status : "unknown";
+      const presentation = readinessStatusPresentation[status]
+        || { label: status.replaceAll("_", " "), description: `${status.replaceAll("_", " ")}, not ready` };
+      return `
+        <span class="check-status ${escapeHtml(status)}" aria-label="Status: ${escapeHtml(presentation.description)}">
+          <span class="check-status-marker" aria-hidden="true"></span>
+          <span>${escapeHtml(presentation.label)}</span>
+        </span>
+      `;
+    }
+
+    async function runPrerequisiteCheck() {
+      if (isStandalone()) return;
+      const button = byId("check-prerequisites");
+      const results = byId("prerequisite-results");
+      const checkedAt = byId("prerequisite-time");
+      const status = byId("readiness-status");
+      button.disabled = true;
+      button.classList.add("loading");
+      button.textContent = "Checking";
+      try {
+        const response = await fetch("/api/prerequisites", { cache: "no-store" });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) throw new Error(safeMessage(payload.error || `Request failed with HTTP ${response.status}.`));
+        prerequisitesChecked = true;
+        const capabilities = {};
+        for (const name of ["apiRead", "apiWrite", "ui"]) {
+          const capability = payload.capabilities?.[name];
+          capabilities[name] = {
+            available: typeof capability?.available === "boolean" ? capability.available : null,
+            authenticated: typeof capability?.authenticated === "boolean" ? capability.authenticated : null,
+            authorised: typeof capability?.authorised === "boolean" ? capability.authorised : null,
+            reason: safeMessage(capability?.reason || "Not verified")
+          };
+        }
+        prerequisiteAssessment = {
+          checkedAt: payload.checkedAt || null,
+          order: [...(payload.order || [])],
+          checks: (payload.checks || []).map((check) => ({ ...check })),
+          actor: typeof payload.actor === "string" ? safeMessage(payload.actor) : null,
+          enterprise: typeof payload.enterprise === "string" ? safeMessage(payload.enterprise) : null,
+          credentialSource: credentialSourceLabel(payload.credentialSource),
+          capabilities,
+          status: "checked"
+        };
+        const contextMatches = payload.enterprise === window.CANVAS_CONFIG?.enterprise && Boolean(prerequisiteAssessment.actor);
+        prerequisitesReady = contextMatches && (capabilityReady(capabilities.apiRead) || capabilityReady(capabilities.ui));
+        prerequisiteAssessment.status = prerequisitesReady ? "ready" : "blocked";
+        byId("readiness-context").textContent = `Actor: ${prerequisiteAssessment.actor || "Unknown"}. Target: ${prerequisiteAssessment.enterprise || "Unknown"}. Credential source: ${prerequisiteAssessment.credentialSource}.${contextMatches ? "" : " Identity or enterprise match is not verified."}`;
+        byId("fallback-order").innerHTML = prerequisiteAssessment.order.map((item) => `<li>${escapeHtml(safeMessage(item))}</li>`).join("");
+        const labels = { apiRead: "API read", apiWrite: "API write", ui: "UI read path" };
+        const fact = (value) => value === true ? "Yes" : value === false ? "No" : "Unknown";
+        results.innerHTML = Object.entries(capabilities).map(([name, capability]) => `
+          <div class="check-item">
+            <strong>${labels[name]}</strong>
+            ${renderReadinessStatus(capabilityReady(capability) ? "ready" : "blocked")}
+            <div>Available: ${fact(capability.available)}. Authenticated: ${fact(capability.authenticated)}. Authorised: ${fact(capability.authorised)}.</div>
+            <div class="muted">${escapeHtml(capability.reason)}</div>
+          </div>`).join("") + prerequisiteAssessment.checks.map((check) => `
+          <div class="check-item">
+            <strong>${escapeHtml(safeMessage(check.name))}</strong>
+            ${renderReadinessStatus(check.status)}
+            <div class="muted">${escapeHtml(safeMessage(check.detail))}</div>
+          </div>
+        `).join("");
+        checkedAt.textContent = new Date(payload.checkedAt).toLocaleTimeString();
+        status.textContent = prerequisitesReady
+          ? `Read access verified. ${capabilityReady(capabilities.apiWrite) ? "API write permission verified; each change still requires preparation and host approval." : "Write permission is not verified. Read only actions remain available."}`
+          : "Readiness is blocked. Availability alone does not prove authentication or enterprise permission.";
+        runAssessment();
+      } catch (error) {
+        prerequisitesChecked = true;
+        prerequisitesReady = false;
+        prerequisiteAssessment = {
+          ...prerequisiteAssessment,
+          checkedAt: new Date().toISOString(),
+          capabilities: {},
+          actor: null,
+          enterprise: null,
+          credentialSource: "Unknown",
+          checks: [{ name: "Prerequisite check", status: "blocked", detail: safeMessage(error.message) }],
+          status: "blocked"
+        };
+        results.innerHTML = `<div class="check-item"><strong>Prerequisite check failed</strong>${renderReadinessStatus("blocked")}<div class="muted">${escapeHtml(safeMessage(error.message))}</div></div>`;
+        checkedAt.textContent = "Failed";
+        byId("readiness-context").textContent = "Actor, target and credential source are not currently verified.";
+        status.textContent = `Readiness check failed: ${safeMessage(error.message)}`;
+        runAssessment();
+      } finally {
+        button.disabled = false;
+        button.classList.remove("loading");
+        button.textContent = "Check prerequisites";
+      }
+    }
+
+    function readRequestState(actionId) {
+      const request = readRequests.get(actionId);
+      const operation = request?.operationId
+        ? operations.get(request.operationId)
+        : request ? null : operationForAction(actionId);
+      const completion = operation && completedActionDetails.get(operation.actionId);
+      const verified = actionStateStatus === "ready" && operation?.status === "completed"
+        && completion?.operationId === operation.operationId && completion?.audit?.complete === true
+        && completion?.verification?.status === "verified" && !actionUnverified(operation.actionId);
+      return { request, operation, completion, verified };
+    }
+
+    function readRequestLocked(actionId) {
+      const { request, operation } = readRequestState(actionId);
+      return request?.status === "requesting" || operationPending(operation)
+        || operationNeedsRecovery(operation)
+        || Boolean(request?.operationId && !operation && operationPending(request));
+    }
+
+    function renderReadRequestStatuses() {
+      for (const actionId of ["inventory", "ai-assessment"]) {
+        const { request, operation, completion, verified } = readRequestState(actionId);
+        byId(actionId).disabled = isStandalone() || readRequestLocked(actionId);
+        if (!request && !operation) continue;
+        const label = actionId === "inventory" ? "Inventory" : "AI assessment";
+        const pending = operationPending(operation) || operationPending(request);
+        const uncertain = operationNeedsRecovery(operation) || request?.status === "interrupted";
+        let message;
+        if (request?.status === "requesting") message = `${label} request in progress. Agent work can use AI credits.`;
+        else if (actionStateStatus !== "ready") message = `${label} outcome unavailable because saved state could not be read. Restore access and refresh saved state; do not infer success or resend automatically.`;
+        else if (verified) message = actionId === "inventory"
+          ? hasLiveInventory() ? "Inventory completed with verified saved evidence. The snapshot is available; budget coverage can still be incomplete."
+            : "Inventory has verified historical evidence, but its current snapshot is missing or stale. No live facts are available."
+          : "AI assessment has verified saved evidence. Read the assessment in chat.";
+        else if (uncertain) message = `${label} outcome unverified. ${safeMessage(request?.message || operation?.message || "")} Refresh saved state and reconcile the recorded operation if available. No request will be resent automatically.`;
+        else if (pending) message = `${label} queued or running. Select Refresh saved state to check its outcome.${actionId === "ai-assessment" ? " Read the assessment in chat; dispatch does not verify its conclusions." : ""}`;
+        else message = `${label}: ${safeMessage(operation?.status || request?.status || "unavailable")}. No verified completion is recorded. ${safeMessage(operation?.message || request?.message || "")}`;
+        byId(actionId === "inventory" ? "readiness-status" : "assessment-refresh-status").textContent = message;
+        if (actionId === "ai-assessment") {
+          byId("ai-assessment-output").hidden = false;
+          byId("ai-assessment-text").textContent = verified && typeof completion.assessment === "string"
+            ? safeMessage(completion.assessment) : message;
+        }
+      }
+    }
+
+    async function requestReadAction(actionId, path) {
+      if (isStandalone() || readRequestLocked(actionId)) return;
+      const button = byId(actionId);
+      readRequests.set(actionId, { status: "requesting" });
+      renderReadRequestStatuses();
+      try {
+        const payload = await callLocalService(path, button, "Requesting");
+        if (typeof payload.status !== "string") throw new Error("The service did not return an operation status. Refresh saved state before requesting again.");
+        readRequests.set(actionId, {
+          status: payload.status,
+          operationId: typeof payload.operationId === "string" ? payload.operationId : null,
+          message: safeMessage(payload.message || "")
+        });
+        await loadCompletedActions();
+      } catch (error) {
+        readRequests.set(actionId, { ...readRequests.get(actionId), status: "interrupted", message: safeMessage(error.message) });
+        await loadCompletedActions();
+      } finally {
+        renderReadRequestStatuses();
+      }
+    }
+
+    async function runInventory() {
+      await requestReadAction("inventory", "/api/inventory");
+    }
+
+    async function runAiAssessment() {
+      await requestReadAction("ai-assessment", "/api/ai-assessment");
+    }
+
+    function switchTab(tabName) {
+      if (!["readiness", "assessment", "advisor", "guidance"].includes(tabName)) return;
+      for (const name of ["readiness", "assessment", "advisor", "guidance"]) {
+        const active = name === tabName;
+        byId(`${name}-panel`).hidden = !active;
+        byId(`tab-${name}`).classList.toggle("active", active);
+        byId(`tab-${name}`).setAttribute("aria-selected", String(active));
+        byId(`tab-${name}`).setAttribute("tabindex", active ? "0" : "-1");
+      }
+      if (tabName === "assessment") runAssessment();
+    }
+
+    function handleTabKeydown(event) {
+      const names = ["readiness", "assessment", "advisor", "guidance"];
+      const index = names.indexOf(event.currentTarget.dataset.tab);
+      const next = event.key === "Home" ? 0 : event.key === "End" ? names.length - 1
+        : event.key === "ArrowRight" ? (index + 1) % names.length
+        : event.key === "ArrowLeft" ? (index + names.length - 1) % names.length : null;
+      if (next === null) return;
+      event.preventDefault();
+      switchTab(names[next]);
+      byId(`tab-${names[next]}`).focus();
+    }
+
+    async function initialize() {
+      applySnapshot();
+      await loadCompletedActions();
+      renderUsers();
+      refreshKnownUsers();
+      runAssessment();
+      renderCompletedActions();
+      const requestedTab = new URLSearchParams(window.location.search).get("tab");
+      if (["readiness", "assessment", "advisor", "guidance"].includes(requestedTab)) {
+        switchTab(requestedTab);
+      }
+      if (freshnessTimer === null) {
+        freshnessTimer = setInterval(refreshFreshnessStatuses, FRESHNESS_REFRESH_INTERVAL_MS);
+      }
+    }
+
+    function resetObservedSettings() {
+      dirtySettings.clear();
+      userDrafts = false;
+      users = fallbackUsers.map((user) => ({ ...user }));
+      byId("universal-budget").value = "";
+      byId("pool-remaining").value = "";
+      byId("paid-usage").value = "unknown";
+      byId("budget-objective").value = "unknown";
+      byId("enterprise-budget").value = "";
+      byId("enterprise-consumed").value = "";
+      byId("enterprise-stop").value = "off";
+      byId("exclude-cost-centers").value = "unknown";
+      byId("cc-name").value = "";
+      byId("cc-user-budget").value = "";
+      byId("cc-spending-budget").value = "";
+      byId("cc-spending-consumed").value = "";
+      byId("cc-stop").value = "off";
+      byId("cc-included-control").value = "off";
+      byId("cc-included-action").value = "unknown";
+      byId("cc-pool-remaining").value = "";
+      byId("org-name").value = "";
+      byId("org-budget").value = "";
+      byId("org-consumed").value = "";
+      byId("org-stop").value = "on";
+      byId("username").value = "";
+      byId("result").innerHTML = `<div class="empty">Enter a username, then select <strong>Calculate budget</strong>.</div>`;
+      applySnapshot();
+      renderUsers();
+      refreshKnownUsers();
+      runAssessment();
+    }
+
+    byId("calculate").addEventListener("click", calculate);
+    byId("username").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") calculate();
+    });
+    byId("add-user").addEventListener("click", () => {
+      userDrafts = true;
+      users.push({ username: "", consumed: null, individualBudget: null, costCenter: "", organization: "" });
+      renderUsers();
+      refreshKnownUsers();
+    });
+    byId("reset").addEventListener("click", resetObservedSettings);
+    byId("inventory").addEventListener("click", runInventory);
+    byId("ai-assessment").addEventListener("click", runAiAssessment);
+    byId("check-prerequisites").addEventListener("click", runPrerequisiteCheck);
+    byId("reload-action-state").addEventListener("click", loadCompletedActions);
+    document.querySelectorAll(".settings input, .settings select").forEach((input) => {
+      if (input.id) input.addEventListener("input", () => {
+        dirtySettings.add(input.id);
+        runAssessment();
+        refreshSelectedAdvisor();
+      });
+    });
+    document.querySelectorAll(".tab").forEach((tab) => {
+      tab.addEventListener("click", () => switchTab(tab.dataset.tab));
+      tab.addEventListener("keydown", handleTabKeydown);
+    });
+
+    initialize().catch((error) => {
+      byId("data-source-status").textContent = `Canvas initialization failed: ${safeMessage(error.message)}`;
+      byId("assessment-refresh-status").textContent = "The canvas could not load its inventory or action state.";
+    });
+  </script>
+</body>
+</html>
