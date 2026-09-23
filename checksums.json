@@ -1,0 +1,121 @@
+{
+  "version": "1.0.0-experimental.1",
+  "algorithm": "SHA256",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": ".github/plugin/marketplace.json",
+      "bytes": 460,
+      "sha256": "e3836bb7e8ce6fe69c70c742f82bb079ea2e1d405bc97b175169785160bff9d6"
+    },
+    {
+      "path": "README.md",
+      "bytes": 7412,
+      "sha256": "81995da28dd8f46003a3d8071148e517a7b881fed5de5834685aa9f37461051e"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/LICENSE",
+      "bytes": 1068,
+      "sha256": "24aea868c745a6383d8384142f24d90c630fd5d732acda17bbc00e1331cb13d7"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/NOTICE",
+      "bytes": 1919,
+      "sha256": "42d19e034f9a449aa5b016584f2d0a5cb17b31e855f1b968fcce17cddbf96875"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/assets/preview.png",
+      "bytes": 161254,
+      "sha256": "d51f735210dc23dab8d1a9aad2fb94963dbb6a3ea4f139e4e7c03c6021f78cb7"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/extension.mjs",
+      "bytes": 13340,
+      "sha256": "298e83a5da18232bda0fbabba94971eb6515d7c15f252f059d4f2affa9bd03eb"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/lib/evidence.mjs",
+      "bytes": 22741,
+      "sha256": "dc1201bf20d6368c0cdc420ae1e354454a90d59eec80da9cce4ae5d9155bac32"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/lib/operations.mjs",
+      "bytes": 29395,
+      "sha256": "555174e52b8f2e4dc31c52d6b1239a4bee0aeda4642009480f14c921977820ad"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/lib/readiness.mjs",
+      "bytes": 21833,
+      "sha256": "4d0ff73ba166193a9179ce4766cdee00ccfb09693666559735aef1d40dd1a150"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/lib/state-store.mjs",
+      "bytes": 26902,
+      "sha256": "c6455ef31312563a90dc4c2083119442a13ccf2d79f21ee35383f9dff658a658"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/licenses/CC-BY-4.0.txt",
+      "bytes": 18620,
+      "sha256": "12d3a82a7d1378e6f597ec23d63a081aeb6ec4bc8de2a76ee9dc96c34c6d7a1b"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/renderer/data/assessment-policy.js",
+      "bytes": 17556,
+      "sha256": "71cbff5b78a4adba0cab415a55dd3d31244524387f782484aa32f5d44dd75a49"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/renderer/data/budget-model.js",
+      "bytes": 17137,
+      "sha256": "fda6786afb115df11d1d4ceef94521b1062a8971571c891e5f339a4d35c7ffe6"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/renderer/data/budgets.md",
+      "bytes": 18474,
+      "sha256": "d615b0ad2ee2a0b51efd6d90c75c2b1899a9f14815f63bd10f42a962df68ff62"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/renderer/data/current-settings.js",
+      "bytes": 178,
+      "sha256": "ffaa1d11180aed6040a623e2d691f8ee29e92b5005e88278fccb856008b710c6"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/renderer/data/finops-metrics.js",
+      "bytes": 2948,
+      "sha256": "0bb37c2ce8aaad302021fa198f1da4789ae527de0f5acf7231f300b73f69d790"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/renderer/data/inventory-freshness-status.js",
+      "bytes": 3078,
+      "sha256": "36ebc31d33fb50bfdb38b5d16878611b2f2d6fc2c20787d7ab419a9cdf8ac0ac"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/renderer/data/optimizing.md",
+      "bytes": 10919,
+      "sha256": "579b2291ee8a3697b4d60e90a5eadfd3dc667296c702c474590df36f3e5bf808"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/renderer/data/ui-verification-status.js",
+      "bytes": 1658,
+      "sha256": "045ed5725e4aa04e33a25b6ef5ad50b0558d978949199d7d1956af648a8463c9"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/renderer/data/ui-verifications.js",
+      "bytes": 139,
+      "sha256": "41a9363468d4ad86ea7ab23024dedad15ee5e2791df200a32abf7b96cbbb45e4"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/com.github.copilot/extensions/github-ai-budget-canvas/renderer/index.html",
+      "bytes": 148830,
+      "sha256": "e57a342d85b93f9ff48dd615102ff5a44a4718f0c36d333f8a95208d74a5483f"
+    },
+    {
+      "path": "plugins/github-ai-budget-canvas/plugin.json",
+      "bytes": 748,
+      "sha256": "e77e38a937bc3cadd09959bfe0885d0f7b8724905cbb4edfa725c814379bf76b"
+    }
+  ]
+}

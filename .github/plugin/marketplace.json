@@ -1,0 +1,18 @@
+{
+  "name": "copilot-finops",
+  "owner": {
+    "name": "anarchitect"
+  },
+  "metadata": {
+    "description": "Experimental Copilot FinOps canvas.",
+    "version": "1.0.0-experimental.1"
+  },
+  "plugins": [
+    {
+      "name": "github-ai-budget-canvas",
+      "description": "Review GitHub Copilot budget configuration and estimate spending in a canvas.",
+      "version": "1.0.0-experimental.1",
+      "source": "./plugins/github-ai-budget-canvas"
+    }
+  ]
+}
