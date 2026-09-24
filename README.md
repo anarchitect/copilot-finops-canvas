@@ -16,9 +16,9 @@ The `.prompt.md` location is standard for supported IDEs. Copilot App users shou
 
 ### Reuse the skill
 
-The skill is [`.github\skills\copilot-finops-fallback\SKILL.md`](.github/skills/copilot-finops-fallback/SKILL.md). Open this repository in Copilot App, or copy the `copilot-finops-fallback` folder into your personal skills directory. On Windows that is `%USERPROFILE%\.copilot\skills\copilot-finops-fallback\SKILL.md`. Review the file before installing it.
+The skill is [`.github\skills\copilot-finops-fallback\SKILL.md`](.github/skills/copilot-finops-fallback/SKILL.md). Prefer opening this repository in the intended Copilot App. For a personal install, the default Windows path is `%USERPROFILE%\.copilot\skills\copilot-finops-fallback\SKILL.md`. Before copying, confirm that App instance's active profile and skills discovery directory through supported App settings or read only session diagnostics. Do not assume it uses your terminal's `COPILOT_HOME`. If the location cannot be confirmed, use the repository skill or paste the standalone prompt instead. Review the file before installing it.
 
-Check the App's **Customize > Skills** view. In an interactive Copilot CLI session, `/skills reload` and `/skills info copilot-finops-fallback` can confirm discovery. If the host does not discover the skill, paste the standalone prompt instead.
+Check **Customize > Skills** in that App instance. In an interactive Copilot CLI session, `/skills reload` and `/skills info copilot-finops-fallback` confirm discovery only for that CLI session, not a separate App profile. If the App does not discover the skill, paste the standalone prompt instead.
 
 Run:
 
